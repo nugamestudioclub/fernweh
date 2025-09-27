@@ -4,7 +4,8 @@ using UnityEngine.InputSystem;
 
 public enum MoveType {
     FREE_LOOK,
-    LOCKED_LOOK
+    LOCKED_LOOK,
+    SEMI_LOCKED_LOOK
 }
 public class DetachableCameraController : MonoBehaviour
 {
@@ -48,15 +49,17 @@ public class DetachableCameraController : MonoBehaviour
     }
     void Update() {
 
-        if (moveType == MoveType.LOCKED_LOOK) {
+        if (moveType == MoveType.LOCKED_LOOK || moveType == MoveType.SEMI_LOCKED_LOOK) {
             Rotation2();
         }
         
     }
     void FixedUpdate() {
         if (moveType == MoveType.FREE_LOOK) {
-            Movement();
             Rotation();
+        }
+        if (moveType == MoveType.FREE_LOOK || moveType == MoveType.SEMI_LOCKED_LOOK) {
+            Movement();
         } else if (moveType == MoveType.LOCKED_LOOK) {
             Movement2();
         }
