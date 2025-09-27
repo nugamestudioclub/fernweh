@@ -31,8 +31,8 @@ public class DetachableCameraController : MonoBehaviour
     [Header("Rotation 2")]
     private float yaw = 0;
     private float pitch = 0;
-    private float yawVelocity = 0f;
-    private float pitchVelocity = 0f;
+    private float targetYaw = 0;
+    private float targetPitch = 0;
     [SerializeField] private float maxPitch = 90;
     [SerializeField] private float rotationSmoothTime = 0.12f;
     [SerializeField] private float mouseSensitivity2 = 2;
@@ -41,7 +41,11 @@ public class DetachableCameraController : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody>();   
 
         rb.linearDamping = airResistance;
-        rb.angularDamping = 2f;
+        if (moveType == MoveType.FREE_LOOK) {
+            rb.angularDamping = 2f;
+        } else {
+            rb.angularDamping = 0;
+        }
         rb.useGravity = false;
         
         Cursor.lockState = CursorLockMode.Locked;
@@ -103,6 +107,30 @@ public class DetachableCameraController : MonoBehaviour
         rb.angularVelocity *= dampingFactor;
     }
 
+    
+    private void Rotation2()
+    {
+        targetYaw += lookInput.x * mouseSensitivity2;
+        targetPitch -= lookInput.y * mouseSensitivity2;
+        targetPitch = Mathf.Clamp(targetPitch, -maxPitch, maxPitch);
+
+        yaw = Mathf.LerpAngle(yaw, targetYaw, rotationSmoothTime);
+        pitch = Mathf.LerpAngle(pitch, targetPitch, rotationSmoothTime);
+
+        transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+    }
+
+    private void Movement2() {
+        Vector3 directionalMovement = new Vector3(movementInput.x, 0f, movementInput.z);
+        directionalMovement = transform.TransformDirection(directionalMovement);
+        directionalMovement.y = movementInput.y;
+
+        Vector3 thrust = directionalMovement * speed;
+
+        rb.AddForce(thrust, ForceMode.Acceleration);
+        VelocityLimit();
+    }
+
     public void OnCamMove(InputAction.CallbackContext context)
     {
         movementInput = context.ReadValue<Vector3>();
@@ -116,34 +144,5 @@ public class DetachableCameraController : MonoBehaviour
     public void OnCamSpin(InputAction.CallbackContext context)
     {
         spinInput = context.ReadValue<float>();
-    }
-
-    private void Rotation2()
-    {
-        yaw += lookInput.x * mouseSensitivity2;
-        pitch -= lookInput.y * mouseSensitivity2;
-
-        pitch = Mathf.Clamp(pitch, -maxPitch, maxPitch);
-        
-        float currentYaw = transform.eulerAngles.y;
-        float currentPitch = transform.eulerAngles.x;
-
-        if (currentPitch > 180f) currentPitch -= 360f;
-        
-        float smoothYaw = Mathf.SmoothDampAngle(currentYaw, yaw, ref yawVelocity, rotationSmoothTime);
-        float smoothPitch = Mathf.SmoothDampAngle(currentPitch, pitch, ref pitchVelocity, rotationSmoothTime);
-        
-        transform.rotation = Quaternion.Euler(smoothPitch, smoothYaw, 0f);
-    }
-
-    private void Movement2() {
-        Vector3 directionalMovement = new Vector3(movementInput.x, 0f, movementInput.z);
-        directionalMovement = transform.TransformDirection(directionalMovement);
-        directionalMovement.y = movementInput.y;
-
-        Vector3 thrust = directionalMovement * speed;
-
-        rb.AddForce(thrust, ForceMode.Acceleration);
-        VelocityLimit();
     }
 }
