@@ -4,68 +4,88 @@ using UnityEngine.InputSystem;
 
 public class DetachableCameraController : MonoBehaviour
 {
-    private Rigidbody rb;
-    [SerializeField] private Vector3 move_input;
+    [Header("Flight Settings")]
+    [SerializeField] private float speed = 15;
+    [SerializeField] private float maxSpeed = 50;
+    [SerializeField] private float spinSpeed = 1;
+    [SerializeField] private float mouseSensitivity = 2f;
 
+
+    [Header("Physics")]
+    [SerializeField] private float airResistance = 0.02f;
+    [SerializeField] private float dampingFactor = 0.95f;
     
-    [SerializeField] private float maxSpeed;
-    [SerializeField] private float accelRate;
-
-    [SerializeField] private float mouseSensitivity;
-
-    [SerializeField] private Transform cam;
-
-
-    InputAction camMoveAction;
-    InputAction mouseAction;
-    InputAction camSpinAction;
+    private Rigidbody rb;
+    
+    // Input values
+    private Vector3 movementInput;
+    private Vector2 lookInput;
+    private float spinInput;
 
     void Start() {
-        rb = gameObject.GetComponent<Rigidbody>();    
+        rb = gameObject.GetComponent<Rigidbody>();   
 
-        camMoveAction = InputSystem.actions.FindAction("CamMove");
-        mouseAction = InputSystem.actions.FindAction("Look");
-        camSpinAction = InputSystem.actions.FindAction("CamSpin");
-
-    }
-    void Update() {
+        rb.linearDamping = airResistance;
+        rb.angularDamping = 2f;
+        rb.useGravity = false;
         
-        CursorStuff();
+        Cursor.lockState = CursorLockMode.Locked;
+
     }
     void FixedUpdate() {
         Movement();
         Rotation();
+        Damping();
     }
 
     private void Movement() {
-        move_input = camMoveAction.ReadValue<Vector3>();
-        move_input.Normalize();
+        Vector3 directionalMovement = transform.TransformDirection(movementInput);
+        Vector3 thrust = directionalMovement * speed;
 
-        Vector3 targetSpeed = transform.TransformDirection(move_input) * maxSpeed;
-        Vector3 speedDif = targetSpeed - rb.linearVelocity;
-        Vector3 movement = speedDif * accelRate;
-        rb.AddForce(movement);
+        rb.AddForce(thrust, ForceMode.Acceleration);
+        VelocityLimit();
     }
 
     private void Rotation() {
-        Vector2 mouse = mouseAction.ReadValue<Vector2>() * mouseSensitivity * Time.deltaTime;
-        float spin = camSpinAction.ReadValue<float>() * 30 * Time.deltaTime;
 
-        rb.AddTorque(transform.right * mouse.y * -1);
-        rb.AddTorque(transform.up * mouse.x * 1);
-        rb.AddTorque(transform.forward * spin * -1);
+        Vector3 torque = 
+        transform.right * -lookInput.y * mouseSensitivity+   // pitch
+        transform.up * lookInput.x * mouseSensitivity+       // yaw
+        transform.forward * -spinInput * spinSpeed;     // roll
+
+        rb.AddTorque(torque);   
     }
 
-    private void CursorStuff() {
-        if (Input.GetKeyDown(KeyCode.Escape))
+    private void VelocityLimit()
+    {
+        if (rb.linearVelocity.magnitude > maxSpeed)
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
         }
-        else if (Input.GetMouseButtonDown(0)) // click to re-lock
+    }
+    
+    private void Damping()
+    {
+        if (movementInput.magnitude < .1)
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            rb.linearVelocity *= dampingFactor;
         }
+        
+        rb.angularVelocity *= dampingFactor;
+    }
+
+    public void OnCamMove(InputAction.CallbackContext context)
+    {
+        movementInput = context.ReadValue<Vector3>();
+    }
+    
+    public void OnLook(InputAction.CallbackContext context)
+    {
+        lookInput = context.ReadValue<Vector2>();
+    }
+    
+    public void OnCamSpin(InputAction.CallbackContext context)
+    {
+        spinInput = context.ReadValue<float>();
     }
 }
