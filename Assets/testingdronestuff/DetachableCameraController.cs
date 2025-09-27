@@ -2,8 +2,13 @@ using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.InputSystem;
 
+public enum MoveType {
+    FREE_LOOK,
+    LOCKED_LOOK
+}
 public class DetachableCameraController : MonoBehaviour
 {
+    [SerializeField] private MoveType moveType; 
     [Header("Flight Settings")]
     [SerializeField] private float speed = 15;
     [SerializeField] private float maxSpeed = 50;
@@ -22,6 +27,15 @@ public class DetachableCameraController : MonoBehaviour
     private Vector2 lookInput;
     private float spinInput;
 
+    [Header("Rotation 2")]
+    private float yaw = 0;
+    private float pitch = 0;
+    private float yawVelocity = 0f;
+    private float pitchVelocity = 0f;
+    [SerializeField] private float maxPitch = 90;
+    [SerializeField] private float rotationSmoothTime = 0.12f;
+    [SerializeField] private float mouseSensitivity2 = 2;
+
     void Start() {
         rb = gameObject.GetComponent<Rigidbody>();   
 
@@ -32,9 +46,21 @@ public class DetachableCameraController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
     }
+    void Update() {
+
+        if (moveType == MoveType.LOCKED_LOOK) {
+            Rotation2();
+        }
+        
+    }
     void FixedUpdate() {
-        Movement();
-        Rotation();
+        if (moveType == MoveType.FREE_LOOK) {
+            Movement();
+            Rotation();
+        } else if (moveType == MoveType.LOCKED_LOOK) {
+            Movement2();
+        }
+       
         Damping();
     }
 
@@ -87,5 +113,34 @@ public class DetachableCameraController : MonoBehaviour
     public void OnCamSpin(InputAction.CallbackContext context)
     {
         spinInput = context.ReadValue<float>();
+    }
+
+    private void Rotation2()
+    {
+        yaw += lookInput.x * mouseSensitivity2;
+        pitch -= lookInput.y * mouseSensitivity2;
+
+        pitch = Mathf.Clamp(pitch, -maxPitch, maxPitch);
+        
+        float currentYaw = transform.eulerAngles.y;
+        float currentPitch = transform.eulerAngles.x;
+
+        if (currentPitch > 180f) currentPitch -= 360f;
+        
+        float smoothYaw = Mathf.SmoothDampAngle(currentYaw, yaw, ref yawVelocity, rotationSmoothTime);
+        float smoothPitch = Mathf.SmoothDampAngle(currentPitch, pitch, ref pitchVelocity, rotationSmoothTime);
+        
+        transform.rotation = Quaternion.Euler(smoothPitch, smoothYaw, 0f);
+    }
+
+    private void Movement2() {
+        Vector3 directionalMovement = new Vector3(movementInput.x, 0f, movementInput.z);
+        directionalMovement = transform.TransformDirection(directionalMovement);
+        directionalMovement.y = movementInput.y;
+
+        Vector3 thrust = directionalMovement * speed;
+
+        rb.AddForce(thrust, ForceMode.Acceleration);
+        VelocityLimit();
     }
 }
