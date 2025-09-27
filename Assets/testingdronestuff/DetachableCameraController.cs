@@ -131,7 +131,7 @@ public class DetachableCameraController : MonoBehaviour
         VelocityLimit();
     }
 
-    public void OnCamMove(InputAction.CallbackContext context)
+    public void OnMove(InputAction.CallbackContext context)
     {
         movementInput = context.ReadValue<Vector3>();
     }
@@ -141,7 +141,7 @@ public class DetachableCameraController : MonoBehaviour
         lookInput = context.ReadValue<Vector2>();
     }
     
-    public void OnCamSpin(InputAction.CallbackContext context)
+    public void OnSpin(InputAction.CallbackContext context)
     {
         spinInput = context.ReadValue<float>();
     }

@@ -99,7 +99,7 @@
                 {
                     "name": "CamSpin",
                     "type": "Value",
-                    "id": "235b4979-d0f5-411e-a418-6c4e43f4568b",
+                    "id": "10820a5a-21ca-489f-82db-a0defe75239a",
                     "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
@@ -571,7 +571,7 @@
                 },
                 {
                     "name": "1D Axis",
-                    "id": "08071b2e-4d23-429d-b542-421e778e5df3",
+                    "id": "7e7404f7-a82b-48bd-aad2-74d95dc2cda0",
                     "path": "1DAxis",
                     "interactions": "",
                     "processors": "",
@@ -582,7 +582,7 @@
                 },
                 {
                     "name": "negative",
-                    "id": "92694edc-21c4-484f-bcd8-e3e9ea25370c",
+                    "id": "179f13bc-8b7d-4a2a-b1af-2eecd4ad2258",
                     "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
@@ -593,7 +593,7 @@
                 },
                 {
                     "name": "positive",
-                    "id": "19640f2b-aafd-40df-a46b-7005cf3b5b3f",
+                    "id": "714828b3-cf2c-4b0d-8722-ccf33f67d947",
                     "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
