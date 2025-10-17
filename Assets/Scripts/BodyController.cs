@@ -1,22 +1,20 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Rendering;
 
-[RequireComponent(typeof(CharacterController))]
 public class BodyController : MonoBehaviour
 {
     private CharacterController m_controller;
 
-    [SerializeField, Tooltip("The target lateral velocity to move towards.")] 
+    [SerializeField, Tooltip("The target lateral velocity to move towards.")]
     private float m_maxGroundVelocityMagnitude;
 
-    [SerializeField, Tooltip("How fast we move towards our target velocity over the course of one second.")] 
+    [SerializeField, Tooltip("How fast we move towards our target velocity over the course of one second.")]
     private float m_acceleration;
 
     [SerializeField, Tooltip("The scale of additional acceleration to apply depending on the dot product of input direction and move direction.")]
     private AnimationCurve m_deltaAccelerationCurve;
 
-    [SerializeField, Tooltip("The maximum magnitude of a delta force applied.")] 
+    [SerializeField, Tooltip("The maximum magnitude of a delta force applied.")]
     private float m_deltaAccelerationMagnitude;
 
     [SerializeField, Tooltip("The coyote-time in seconds.")]
@@ -25,69 +23,162 @@ public class BodyController : MonoBehaviour
     [SerializeField, Tooltip("The jump buffer duration in seconds.")]
     private float m_jumpBufferTime;
 
-    [SerializeField, Tooltip("The jump impulse force to instantly apply.")]
-    private float m_jumpImpulse;
-
     [SerializeField] private Transform m_raycastOrigin;
     private Transform m_perspective;
 
     [SerializeField] private AnimationCurve m_jumpCurve;
     [SerializeField] private float m_jumpRiseEndTimestamp;
-    private Coroutine m_jumpRoutine;
+
+    private const int LAYER_MASK = ~(1 << 3); // ignores player
+
 
     private Vector3 m_groundVelocity;
     private float m_yVelocity;
 
+    private bool m_wasPreviouslyGrounded;
     private bool m_applyGravity;
-    private bool m_coyoteHanging;
-    private Coroutine m_coyoteTimer;
 
-    private bool m_isJumpBuffered;
-    private Coroutine m_jumpBufferTimer;
-    // TODO:
-    // gravity DONE -> 
-    // coyote time DONE ->
-    // jumping DONE ->
-    // Hollow Knight jump height control DONE ->
-    // custom gravity scalars ->
-    // cleanup
+    private Coroutine m_jumpRiseRoutine;
+    private TemporaryBoolean m_hasPendingJump;
+    private TemporaryBoolean m_isCoyoteFloating;
 
     private void Awake()
     {
         m_controller = GetComponent<CharacterController>();
         m_perspective = Camera.main.transform;
+
+        m_hasPendingJump = new TemporaryBoolean();
+        m_isCoyoteFloating = new TemporaryBoolean();
     }
+
 
     private void Update()
     {
+        TickTemporaryBools();
+
+        // gather input
         var inputs = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
-        bool was_jump_pressed = Input.GetAxisRaw("Jump") > 0.05f;
-
-        if (was_jump_pressed)
-        {
-            if (m_jumpBufferTimer != null)
-            {
-                StopCoroutine(m_jumpBufferTimer);
-            }
-
-            StartCoroutine(IEBufferThenClear());
-        }
+        bool is_jump_down = Input.GetAxisRaw("Jump") > 0.05f;
 
         bool is_grounded = false;
-        Vector3 surface_up = Vector3.up; // if miss, use world up
-        if (Physics.SphereCast(
-                m_raycastOrigin.position,
-                m_controller.radius,
-                Vector3.down, 
-                out var hit, 
-                0.1f,
-                ~(1 << 3))) // ignoring the player
+        var surface_up = Vector3.up; // if miss, use world up
+        // check for ground collision to get surface normal
+        if (Physics.SphereCast(m_raycastOrigin.position, m_controller.radius, Vector3.down, out var hit, 0.1f, LAYER_MASK))
         {
             surface_up = hit.normal;
-
             is_grounded = true;
         }
 
+        // 
+
+        // update the player's nonvertical velocity
+        // mutates m_groundVelocity.
+        ComputeGroundVelocity(inputs, surface_up);
+
+        // checks for initiating the Coyote Float status
+        // mutates the m_isCoyoteFloating temporary boolean
+        HandleCoyoteFloat(is_grounded);
+
+        // handles performing jumps and computing gravity forces for the frame
+        HandleJumpAndGravity(is_jump_down, is_grounded);
+
+        // apply movement
+        m_controller.Move(m_groundVelocity * Time.deltaTime + m_yVelocity * Time.deltaTime * Vector3.up);
+
+        CheckResetYVelo(is_grounded);
+    }
+
+    private void CheckResetYVelo(bool is_grounded)
+    {
+        // if contact with the ground was made, reset yvelo to 0.
+        if (is_grounded != m_wasPreviouslyGrounded && is_grounded)
+        {
+            m_yVelocity = 0f;
+        }
+
+        m_wasPreviouslyGrounded = is_grounded;
+    }
+
+    private void HandleCoyoteFloat(bool is_grounded)
+    {
+        // if conditions are met, enter coyote float.
+        //
+        // CONDITIONS:
+        // if you aren't grounded, you start coyote floating
+        // if you are already experiencing gravity, then it's too late to coyote float
+        // if you are already floating, don't restart the timer
+        // if you are jumping, you dont get to float
+        // if we just ended coyote float, don't restart it again immediately. This prevents coyote float loops
+        // due to order of execution. Tick -> Coyote Check -> Gravity would always leave you in Coyote Float if you didnt
+        // make sure to not restart Coyote Float as soon as it expires.
+        if (!is_grounded && !m_applyGravity 
+            && !m_isCoyoteFloating.State 
+            && !IsPerformingJumpRise() && !m_isCoyoteFloating.ExpiredThisTick())
+        {
+            m_isCoyoteFloating.SetActive(m_coyoteTime);
+        }
+        // if you are grounded but also in the floating state, exit the float bc it's not needed.
+        else if (is_grounded && m_isCoyoteFloating.State)
+        {
+            m_isCoyoteFloating.Expire();
+        }
+    }
+
+    private void HandleJumpAndGravity(bool jump_pressed, bool is_grounded)
+    {
+        // if we are to jump, enable the buffer
+        if (jump_pressed) m_hasPendingJump.SetActive(m_jumpBufferTime);
+
+        // semantically grounded if you are actually grounded or in coyote float
+        bool grounded = is_grounded || m_isCoyoteFloating.State;
+
+        if (grounded)
+        {
+            m_applyGravity = false;
+
+            // if you are semantically grounded, check to see if you have a buffered jump to consume
+            // only jump if you aren't jumping already. We can technically be semantically grounded and
+            // in the beginning phase of a jump due to spherecast length error bounds.
+            if (m_hasPendingJump.State && !IsPerformingJumpRise())
+            {
+                // consume jump buffer
+                m_hasPendingJump.Expire();
+
+                // automatically end coyote time
+                m_isCoyoteFloating.Expire();
+
+                BeginJump();
+            }
+        }
+        else
+        {
+            // if you aren't semantically grounded, apply gravity if we are no longer in the rising-jump phase
+            // of our airborne-ness.
+            m_applyGravity = !IsPerformingJumpRise();
+        }
+
+        // if gravity is to be applied, compute it
+        if (m_applyGravity)
+        {
+            m_yVelocity += Physics.gravity.y * Time.deltaTime;
+        }
+    }
+
+    private void BeginJump()
+    {
+        if (IsPerformingJumpRise())
+        {
+            StopCoroutine(m_jumpRiseRoutine);
+            m_jumpRiseRoutine = null;
+        }
+
+        m_jumpRiseRoutine = StartCoroutine(IEPerformJumpRise());
+    }
+
+    private bool IsPerformingJumpRise() => m_jumpRiseRoutine != null;
+
+    private void ComputeGroundVelocity(Vector2 inputs, Vector3 surface_up)
+    {
         var forward = Vector3.Cross(m_perspective.right, surface_up);
 
         var slope_quat = Quaternion.FromToRotation(Vector3.up, surface_up);
@@ -99,111 +190,10 @@ public class BodyController : MonoBehaviour
         // us on the ground when we are on slopes or something.
         var target_ground_velocity = forward_vec + right_vec;
 
-        m_groundVelocity = 
-            Vector3.MoveTowards(
-                m_groundVelocity, 
-                target_ground_velocity, 
+        m_groundVelocity = Vector3.MoveTowards(
+                m_groundVelocity,
+                target_ground_velocity,
                 (ComputeDeltaAcceleration(inputs, m_groundVelocity) + m_acceleration) * Time.deltaTime);
-
-
-        // COYOTE TIME HANDLING
-        // only trigger coyote time if we're not grounded, not already adding gravity (i.e. if we jumped)
-        // and if we're already not running a coyote timer, and not already jumping
-        if (!is_grounded && !m_applyGravity && m_coyoteTimer == null && m_jumpRoutine == null)
-        {
-            m_coyoteTimer = StartCoroutine(IEWaitForCoyoteTime());
-        }
-        else if (is_grounded && m_coyoteTimer != null)
-        {
-            StopCoroutine(m_coyoteTimer);
-            m_coyoteTimer = null;
-        }
-        
-        if (is_grounded || m_coyoteHanging)
-        {
-            if (m_isJumpBuffered)
-            {
-                // stop jump routine if going (precaution)
-                if (m_jumpRoutine != null)
-                {
-                    StopCoroutine(m_jumpRoutine);
-                    m_jumpRoutine = null;
-                }
-
-                // stop coyote timer if ongoing (we dont want gravity to go off yet)
-                if (m_coyoteTimer != null)
-                {
-                    StopCoroutine(m_coyoteTimer);
-                    m_coyoteTimer = null;
-                }
-
-                // start jump routine
-                m_jumpRoutine = StartCoroutine(IEPerformJumpRoutine());
-
-                // clear coyote time (precaution)
-                m_coyoteHanging = false; // TODO make a "temporary bool" variable that has timing built into it.
-            }
-            else
-            {
-                m_applyGravity = false;
-            }
-        }
-
-        if (m_applyGravity)
-        {
-            m_yVelocity += Physics.gravity.y * Time.deltaTime;
-        }
-        // END
-
-        m_controller.Move(m_groundVelocity * Time.deltaTime + m_yVelocity * Time.deltaTime * Vector3.up);
-    }
-
-    private IEnumerator IEPerformJumpRoutine()
-    {
-        float time_elapsed = 0f;
-        // while jump down, perform routine as usual
-        while (Input.GetAxisRaw("Jump") > 0.05f && time_elapsed < m_jumpRiseEndTimestamp)
-        {
-            yield return new WaitForEndOfFrame();
-            time_elapsed += Time.deltaTime;
-
-            m_yVelocity = m_jumpCurve.Evaluate(time_elapsed);
-        }
-
-        m_yVelocity = m_jumpCurve.Evaluate(Mathf.Max(time_elapsed, m_jumpRiseEndTimestamp));
-
-        // TODO impl other variant?
-        // instead of cutting to the end of the curve and apply a bigger stopper-force,
-        // why not just accelerate the evaluation of the graph? (exiting when done, ofc)
-        // that should avoid the abrupt skip that jumping the rest of the curve has, since it's being evaluated now (but faster)
-        while (m_yVelocity > 0.05f)
-        {
-            yield return new WaitForEndOfFrame();
-
-            m_yVelocity += Physics.gravity.y * 2 * Time.deltaTime;
-        }
-
-        m_applyGravity = true;
-    }
-
-    // abstractable with below, obviously. later, later
-    private IEnumerator IEWaitForCoyoteTime()
-    {
-        m_coyoteHanging = true;
-
-        yield return new WaitForSeconds(m_coyoteTime);
-
-        m_applyGravity = true;
-        m_coyoteHanging = false;
-    }
-
-    private IEnumerator IEBufferThenClear()
-    {
-        m_isJumpBuffered = true;
-
-        yield return new WaitForSeconds(m_jumpBufferTime);
-
-        m_isJumpBuffered = false;
     }
 
     private float ComputeDeltaAcceleration(Vector2 normalized_dir, Vector2 non_normalized_velo)
@@ -211,5 +201,40 @@ public class BodyController : MonoBehaviour
         if (non_normalized_velo.magnitude < 0.5f) return 0f;
 
         return m_deltaAccelerationCurve.Evaluate(Vector2.Dot(non_normalized_velo.normalized, normalized_dir)) * m_deltaAccelerationMagnitude;
+    }
+
+    private IEnumerator IEPerformJumpRise()
+    {
+        float time_elapsed = 0f;
+        float last_key_timestamp = m_jumpCurve.keys[^1].time;
+
+        // while jump down, perform routine as usual
+        while (time_elapsed < m_jumpRiseEndTimestamp)
+        {
+            if (!(Input.GetAxisRaw("Jump") > 0.05f)) break;
+
+            yield return new WaitForEndOfFrame();
+            time_elapsed += Time.deltaTime;
+
+            m_yVelocity = m_jumpCurve.Evaluate(time_elapsed);
+        }
+
+        while (time_elapsed < last_key_timestamp)
+        {
+            yield return new WaitForEndOfFrame();
+            time_elapsed += Time.deltaTime * 3;
+
+            m_yVelocity = m_jumpCurve.Evaluate(time_elapsed);
+        }
+
+        m_jumpRiseRoutine = null;
+        m_applyGravity = true; // slightly hacky, but needed to prevent Coyote Float
+                               // from activating immediately after ending jump rise.
+    }
+
+    private void TickTemporaryBools()
+    {
+        m_hasPendingJump.Tick(Time.deltaTime);
+        m_isCoyoteFloating.Tick(Time.deltaTime);
     }
 }
