@@ -37,6 +37,7 @@ public class BodyController : MonoBehaviour
 
     private bool m_wasPreviouslyGrounded;
     private bool m_applyGravity;
+    private bool m_forcedJump;
 
     private Coroutine m_jumpRiseRoutine;
     private TemporaryBoolean m_hasPendingJump;
@@ -124,6 +125,23 @@ public class BodyController : MonoBehaviour
         }
     }
 
+    public void ResetAttributes()
+    {
+        m_yVelocity = 0f;
+        m_groundVelocity = Vector3.zero;
+
+        m_hasPendingJump.Expire();
+        m_isCoyoteFloating.Expire();
+
+        if (m_jumpRiseRoutine != null)
+        {
+            StopCoroutine(m_jumpRiseRoutine);
+            m_jumpRiseRoutine = null;
+        }
+    }
+
+    public void ForceJumpBuffer() => m_forcedJump = true;
+
     private void HandleJumpAndGravity(bool jump_pressed, bool is_grounded)
     {
         // if we are to jump, enable the buffer
@@ -132,15 +150,18 @@ public class BodyController : MonoBehaviour
         // semantically grounded if you are actually grounded or in coyote float
         bool grounded = is_grounded || m_isCoyoteFloating.State;
 
-        if (grounded)
+        if (grounded || m_forcedJump)
         {
             m_applyGravity = false;
 
             // if you are semantically grounded, check to see if you have a buffered jump to consume
             // only jump if you aren't jumping already. We can technically be semantically grounded and
             // in the beginning phase of a jump due to spherecast length error bounds.
-            if (m_hasPendingJump.State && !IsPerformingJumpRise())
+            if ((m_hasPendingJump.State && !IsPerformingJumpRise()) || m_forcedJump)
             {
+                // expire the forced jump, in case we had to use it
+                m_forcedJump = false;
+
                 // consume jump buffer
                 m_hasPendingJump.Expire();
 

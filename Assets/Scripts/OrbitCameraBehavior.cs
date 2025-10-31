@@ -3,9 +3,10 @@ using UnityEngine;
 
 public class OrbitCameraBehavior : MonoBehaviour
 {
-    [SerializeField] private float m_radius;
+    [SerializeField] private float m_orbitRadius;
     [SerializeField] private float m_lerpRate;
-    [SerializeField] private Transform m_focusTarget;
+    [SerializeField] private Transform m_orbitTarget;
+    [SerializeField] private Vector3 m_orbitHeightOffset = Vector3.up * 0.5f;
 
     [Space(10)]
 
@@ -16,30 +17,73 @@ public class OrbitCameraBehavior : MonoBehaviour
 
     [SerializeField] private Vector2 m_verticalRotationBounds = new Vector2(-80, 75);
 
+    [Space(10)]
+
+    [SerializeField] private float m_shootViewRadius;
+
     private Transform m_cameraTransform;
     private Transform m_targetTransform;
 
-    private Vector3 m_focusHeightOffset = Vector3.up * 2f;
+    private float m_currentRadius;
     private LayerMask m_ignoreFocus;
     private float m_yRot; // not really y-rotation, but tracks the "vertical" rotation
 
+    private bool m_inShootView;
+
+    private GameObject m_shootObject;
+
+    public void CheckToggleShootViewState(bool do_toggle)
+    {
+        if (!do_toggle) return;
+
+        m_inShootView = !m_inShootView;
+
+        // enter state
+        if (m_inShootView)
+        {
+            var offset_dir = -(m_cameraTransform.right + m_cameraTransform.forward).normalized;
+
+            // set initial position offset so RotateAround behaves properly
+            m_targetTransform.position = GetFocusPosition() + offset_dir * m_shootViewRadius;
+
+            m_currentRadius = m_shootViewRadius;
+
+            m_shootObject.gameObject.SetActive(true);
+        }
+        else
+        {
+            m_targetTransform.position = GetFocusPosition() - m_cameraTransform.forward * m_orbitRadius;
+
+            m_currentRadius = m_orbitRadius;
+
+            m_shootObject.gameObject.SetActive(false);
+        }
+    }
+
     private void Awake()
     {
+        // prototype code structural setup, so just do whatever comes easiest.
+        m_shootObject = FindFirstObjectByType<ZiplineShootBehavior>(FindObjectsInactive.Include).gameObject;
+
         Cursor.lockState = CursorLockMode.Locked;
 
+        m_inShootView = false;
+        m_currentRadius = m_orbitRadius;
         m_cameraTransform = Camera.main.transform;
 
-        m_cameraTransform.LookAt(m_focusTarget);
+        // m_cameraTransform.LookAt(GetFocusPosition());
 
         m_targetTransform = new GameObject("Camera_TargetTransform").transform;
-        m_targetTransform.SetParent(m_focusTarget); // so that the target moves with the focus, so that the CAMERA moves with the focus.
-        m_targetTransform.SetPositionAndRotation(m_cameraTransform.position + m_focusHeightOffset, m_cameraTransform.rotation);
+        m_targetTransform.SetParent(m_orbitTarget); // so that the target moves with the focus, so that the CAMERA moves with the focus.
+        m_targetTransform.SetPositionAndRotation(m_cameraTransform.position + m_orbitHeightOffset, m_cameraTransform.rotation);
 
-        m_ignoreFocus = ~(1 << m_focusTarget.gameObject.layer);
+        m_ignoreFocus = ~(1 << m_orbitTarget.gameObject.layer);
     }
 
     private void Update()
     {
+        CheckToggleShootViewState(Input.GetButtonDown("Fire2"));
+
         var mouse_delta = Input.mousePositionDelta;
 
         m_targetTransform.RotateAround(GetFocusPosition(), Vector3.up, mouse_delta.x * Time.deltaTime * m_xRotationSpeed);
@@ -57,7 +101,15 @@ public class OrbitCameraBehavior : MonoBehaviour
     {
         // lerp camera transform position and rotation to that of the target
         m_cameraTransform.position = Vector3.Slerp(m_cameraTransform.position, m_targetTransform.position, Time.deltaTime * m_lerpRate);
-        m_cameraTransform.LookAt(m_focusTarget);
+
+        if (!m_inShootView)
+        {
+            m_cameraTransform.LookAt(GetFocusPosition());
+        }
+        else
+        {
+            m_cameraTransform.forward = Vector3.Lerp(m_cameraTransform.forward, m_targetTransform.forward, Time.deltaTime * m_lerpRate);
+        }
     }
 
     private void HandleObstructions()
@@ -66,7 +118,7 @@ public class OrbitCameraBehavior : MonoBehaviour
         // Debug.DrawLine(GetFocusPosition(), GetFocusPosition()+direction_vector*m_radius, Color.yellow);
         
         // not quite as good as spherecast, but much less of a fuss when it comes to setting the new position.
-        if (Physics.Raycast(GetFocusPosition(), direction_vector, out var hit, m_radius, m_ignoreFocus))
+        if (Physics.Raycast(GetFocusPosition(), direction_vector, out var hit, m_currentRadius, m_ignoreFocus))
         {
             // Debug.Log(hit.collider.name);
             // Debug.DrawRay(hit.point, Vector3.up, Color.red);
@@ -74,7 +126,7 @@ public class OrbitCameraBehavior : MonoBehaviour
         }
         else
         {
-            m_targetTransform.position = GetFocusPosition() + direction_vector * m_radius;
+            m_targetTransform.position = GetFocusPosition() + direction_vector * m_currentRadius;
         }
     }
 
@@ -102,5 +154,5 @@ public class OrbitCameraBehavior : MonoBehaviour
         }
     }
 
-    private Vector3 GetFocusPosition() => m_focusHeightOffset + m_focusTarget.position; // Does this work? Test.
+    private Vector3 GetFocusPosition() => m_orbitHeightOffset + m_orbitTarget.position; // Does this work? Test.
 }
