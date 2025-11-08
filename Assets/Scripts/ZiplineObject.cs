@@ -34,6 +34,8 @@ public class ZiplineObject : MonoBehaviour
         MakeAnchors();
 
         m_doScan = true;
+
+        GizmoDebug.Instance.DrawSphereRay(start, end, 0.5f, Color.red);
     }
 
     private void Update()

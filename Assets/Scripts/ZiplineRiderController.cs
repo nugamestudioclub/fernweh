@@ -29,10 +29,11 @@ public class ZiplineRiderController : MonoBehaviour
         m_bodyController.ResetAttributes();
         m_bodyController.enabled = false; // stop processing normal stuff
 
-        m_characterController.transform.position = 
-            m_currentLine.GetDirection() * distance_from_start 
+        var target_pos = m_currentLine.GetDirection() * distance_from_start
             + m_currentLine.GetStart()
             - Vector3.up * m_characterController.height / 2f;
+
+        m_characterController.Move(target_pos - m_characterController.transform.position);
     }
 
     private void Update()
