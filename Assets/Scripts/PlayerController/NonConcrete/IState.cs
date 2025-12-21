@@ -5,7 +5,7 @@ public interface IState<T> where T : IStateContext
     int GetExitPriority();
     void SetStateContext(T context);
 
-    // bool TryCheckForExits<T_Wrapper>(out T_Wrapper highest_prio_exit) where T_Wrapper : Self;
+    bool TryCheckForExits(out string state_name);
 
     void Enter();
     void StateUpdate();

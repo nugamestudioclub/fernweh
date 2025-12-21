@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class AirborneState : AMovementSubState
 {
+    public const string Name = "AirborneState";
+
     private const int STATE_PRIORITY = 0;
 
     public AirborneState() : base(STATE_PRIORITY) { }
@@ -10,11 +12,10 @@ public class AirborneState : AMovementSubState
     {
         throw new System.NotImplementedException();
     }
-
-    /*
-    public override bool TryCheckForExits<T_Wrapper>(out T_Wrapper highest_prio_exit)
+    
+    public override bool TryCheckForExits(out string state_name)
     {
         throw new System.NotImplementedException();
     }
-    */
+    
 }

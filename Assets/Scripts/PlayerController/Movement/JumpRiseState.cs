@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class JumpRiseState : AMovementSubState
 {
+    public const string Name = "JumpRiseState";
+
     private const int STATE_PRIORITY = 0;
 
     public JumpRiseState() : base(STATE_PRIORITY) { }
@@ -11,10 +13,10 @@ public class JumpRiseState : AMovementSubState
         throw new System.NotImplementedException();
     }
 
-    /*
-    public override bool TryCheckForExits<T_Wrapper>(out T_Wrapper highest_prio_exit)
+    
+    public override bool TryCheckForExits(out string state_name)
     {
         throw new System.NotImplementedException();
     }
-    */
+    
 }

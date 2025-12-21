@@ -8,7 +8,7 @@ public abstract class AMovementSubState : IState<MovementStateContext>
 
     public abstract void StateUpdate();
 
-    // public abstract bool TryCheckForExits<T_Wrapper>(out T_Wrapper highest_prio_exit) where T_Wrapper : ISelfState<MovementStateContext>;
+    public abstract bool TryCheckForExits(out string state_name);
 
     public virtual void Enter() { }
 

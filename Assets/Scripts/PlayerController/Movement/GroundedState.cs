@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class GroundedState : AMovementSubState
 {
+    public const string Name = "GroundedState";
+
     private const int STATE_PRIORITY = 0;
 
     private MovementStateContext m_context;
@@ -10,8 +12,8 @@ public class GroundedState : AMovementSubState
 
     public GroundedState() : base(STATE_PRIORITY) { }
 
-    /*
-    public override bool TryCheckForExits<T_Wrapper>(out T_Wrapper highest_prio_exit)
+    
+    public override bool TryCheckForExits(out string state_name)
     {
         bool is_airstate_eligible_for_jump = 
             m_context.AirState == AirState.Grounded 
@@ -34,7 +36,7 @@ public class GroundedState : AMovementSubState
             // slightly redundant as the Context class would establish this on the next ContextUpdate anyways
             // m_context.AirState = AirState.Airborne;
 
-            highest_prio_exit = new JumpRiseState();
+            state_name = JumpRiseState.Name;
             return true;
         }
 
@@ -42,14 +44,13 @@ public class GroundedState : AMovementSubState
         if (m_context.AirState == AirState.Airborne) // Context handles this enum's calculation
         {
             // no need to expire timers or set values
-            highest_prio_exit = new AirborneState();
+            state_name = AirborneState.Name;
             return true;
         }
 
-        highest_prio_exit = default;
+        state_name = default;
         return false;
     }
-    */
 
     public override void StateUpdate()
     {

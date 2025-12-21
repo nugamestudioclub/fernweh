@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public abstract class AStateMachine<C, S> : IStateMachine<C, S> where C : IStateContext where S : IState<C>
 {
     protected C p_context;
@@ -21,16 +19,16 @@ public abstract class AStateMachine<C, S> : IStateMachine<C, S> where C : IState
     public void MachineUpdate()
     {
         p_context.UpdateContext();
-
-        /*
-        if (m_currentState != null && m_currentState.TryCheckForExits(out var exit_to_state))
+        
+        if (m_currentState != null && m_currentState.TryCheckForExits(out string exit_to_state))
         {
-            ChangeState(exit_to_state);
+            ChangeState(FactoryProduceState(exit_to_state));
         }
-        */
-
+        
         m_currentState.StateUpdate();
     }
+
+    protected abstract S FactoryProduceState(string state_name);
 
     protected S GetCurrentState() => m_currentState;
 
