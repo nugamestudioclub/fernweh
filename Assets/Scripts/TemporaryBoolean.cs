@@ -4,7 +4,7 @@ public class TemporaryBoolean
     private float m_timeTillExpiry;
     private bool m_expiredThisTick;
 
-    public bool State { get => m_state; }
+    public bool IsTrue { get => m_state; }
 
     public TemporaryBoolean()
     {

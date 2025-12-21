@@ -26,7 +26,7 @@ public class FPSCounter : MonoBehaviour
         
     }
 
-    // Update is called once per frame
+    // StateUpdate is called once per frame
     void Update()
     {
         updateFPS();

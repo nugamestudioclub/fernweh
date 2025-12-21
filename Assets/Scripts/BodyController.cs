@@ -73,7 +73,7 @@ public class BodyController : MonoBehaviour
         // 
 
         // update the player's nonvertical velocity
-        // mutates m_groundVelocity.
+        // mutates m_velocity.
         ComputeGroundVelocity(inputs, surface_up);
 
         // checks for initiating the Coyote Float status
@@ -113,13 +113,13 @@ public class BodyController : MonoBehaviour
         // due to order of execution. Tick -> Coyote Check -> Gravity would always leave you in Coyote Float if you didnt
         // make sure to not restart Coyote Float as soon as it expires.
         if (!is_grounded && !m_applyGravity 
-            && !m_isCoyoteFloating.State 
+            && !m_isCoyoteFloating.IsTrue 
             && !IsPerformingJumpRise() && !m_isCoyoteFloating.ExpiredThisTick())
         {
             m_isCoyoteFloating.SetActive(m_coyoteTime);
         }
         // if you are grounded but also in the floating state, exit the float bc it's not needed.
-        else if (is_grounded && m_isCoyoteFloating.State)
+        else if (is_grounded && m_isCoyoteFloating.IsTrue)
         {
             m_isCoyoteFloating.Expire();
         }
@@ -148,7 +148,7 @@ public class BodyController : MonoBehaviour
         if (jump_pressed) m_hasPendingJump.SetActive(m_jumpBufferTime);
 
         // semantically grounded if you are actually grounded or in coyote float
-        bool grounded = is_grounded || m_isCoyoteFloating.State;
+        bool grounded = is_grounded || m_isCoyoteFloating.IsTrue;
 
         if (grounded || m_forcedJump)
         {
@@ -157,7 +157,7 @@ public class BodyController : MonoBehaviour
             // if you are semantically grounded, check to see if you have a buffered jump to consume
             // only jump if you aren't jumping already. We can technically be semantically grounded and
             // in the beginning phase of a jump due to spherecast length error bounds.
-            if ((m_hasPendingJump.State && !IsPerformingJumpRise()) || m_forcedJump)
+            if ((m_hasPendingJump.IsTrue && !IsPerformingJumpRise()) || m_forcedJump)
             {
                 // expire the forced jump, in case we had to use it
                 m_forcedJump = false;

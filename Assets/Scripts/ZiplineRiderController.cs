@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 // not made with BodyController.cs to prevent the clutter, altho they should be made together into a state machine later.
@@ -33,7 +34,21 @@ public class ZiplineRiderController : MonoBehaviour
             + m_currentLine.GetStart()
             - Vector3.up * m_characterController.height / 2f;
 
-        m_characterController.Move(target_pos - m_characterController.transform.position);
+        // m_characterController.Move(target_pos - m_characterController.transform.position);
+        StartCoroutine(IE_LerpMount(target_pos - m_characterController.transform.position));
+    }
+
+    private IEnumerator IE_LerpMount(Vector3 delta)
+    {
+        int steps = 10;
+        var delta_increment = delta / steps;
+
+        for (int i = 0; i < steps; i++)
+        {
+            m_characterController.Move(delta_increment);
+
+            yield return new WaitForEndOfFrame();
+        }
     }
 
     private void Update()

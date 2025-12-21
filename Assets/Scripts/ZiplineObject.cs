@@ -42,7 +42,7 @@ public class ZiplineObject : MonoBehaviour
     {
         m_isLockedOut.Tick(Time.deltaTime);
 
-        if (m_doScan && !m_isMounted && !m_isLockedOut.State
+        if (m_doScan && !m_isMounted && !m_isLockedOut.IsTrue
             && Physics.SphereCast(m_startPosition, 0.5f, m_endPosition - m_startPosition, out var hit, float.MaxValue, 1 << 3)
             && hit.collider.TryGetComponent<ZiplineRiderController>(out var component))
         {
