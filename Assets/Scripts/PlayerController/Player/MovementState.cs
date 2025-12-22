@@ -1,44 +1,53 @@
 using UnityEngine;
 
-public class MovementState : AStateMachine<MovementStateContext, AMovementSubState>, IState<PlayerStateContext>
+public class MovementState : 
+    AStateMachine<MovementStateContext, AMovementSubState, MovementState.State>, 
+    IState<PlayerStateContext, PlayerStateMachine.State>
 {
-    private PlayerStateContext m_superstateContext;
+    public enum State
+    {
+        Grounded,
+        Airborne,
+        JumpRise
+    }
+
+    private PlayerStateContext m_myContext;
+
+    public MovementState()
+    {
+        // DEBUG
+        ChangeState(new GroundedState());
+    }
     
-    public bool TryCheckForExits(out string state_name)
+    public bool TryCheckForExits(out PlayerStateMachine.State state_name)
     {
         // stub
         state_name = default;
         return false;
     }
-    
 
     public void StateUpdate()
     {
         MachineUpdate();
 
-        // TODO: applying movement and stuff
+        m_myContext.CharacterController.Move(
+            p_contextForStates.LateralVelocity * Time.deltaTime 
+            + p_contextForStates.AdditiveYVelocity * Time.deltaTime * Vector3.up);
     }
 
-    public void SetStateContext(PlayerStateContext context) => m_superstateContext = context;
+    public void SetStateContext(PlayerStateContext context) => m_myContext = context;
     public int GetExitPriority() => 0;
     public void Enter() { Debug.Log("Entered Movement."); }
     public void Exit() { Debug.Log("Exited Movement."); }
 
-    protected override AMovementSubState FactoryProduceState(string state_name)
+    public override AMovementSubState FactoryProduceState(State state_enum)
     {
-        switch (state_name)
+        return state_enum switch
         {
-            case GroundedState.Name:
-                return new GroundedState();
-
-            case AirborneState.Name:
-                return new AirborneState();
-
-            case JumpRiseState.Name:
-                return new JumpRiseState();
-
-            default:
-                throw new System.ArgumentException("Invalid state name: " + state_name);
-        }
+            State.Grounded => new GroundedState(),
+            State.Airborne => new AirborneState(),
+            State.JumpRise => new JumpRiseState(),
+            _ => throw new System.ArgumentException("Invalid state enum: " + state_enum),
+        };
     }
 }

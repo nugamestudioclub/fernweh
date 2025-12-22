@@ -2,18 +2,13 @@ using UnityEngine;
 
 public class GroundedState : AMovementSubState
 {
-    public const string Name = "GroundedState";
-
     private const int STATE_PRIORITY = 0;
 
     private MovementStateContext m_context;
 
-    private Vector3 m_velocity;
-
     public GroundedState() : base(STATE_PRIORITY) { }
 
-    
-    public override bool TryCheckForExits(out string state_name)
+    public override bool TryCheckForExits(out MovementState.State state_name)
     {
         bool is_airstate_eligible_for_jump = 
             m_context.AirState == AirState.Grounded 
@@ -36,7 +31,7 @@ public class GroundedState : AMovementSubState
             // slightly redundant as the Context class would establish this on the next ContextUpdate anyways
             // m_context.AirState = AirState.Airborne;
 
-            state_name = JumpRiseState.Name;
+            state_name = MovementState.State.JumpRise;
             return true;
         }
 
@@ -44,7 +39,7 @@ public class GroundedState : AMovementSubState
         if (m_context.AirState == AirState.Airborne) // Context handles this enum's calculation
         {
             // no need to expire timers or set values
-            state_name = AirborneState.Name;
+            state_name = MovementState.State.Airborne;
             return true;
         }
 
@@ -55,13 +50,25 @@ public class GroundedState : AMovementSubState
     public override void StateUpdate()
     {
         // TODO may need to make an abstract MovementSubstate class or something, bc i might have a lot of dupe physics code
-        // TODO handling gravity? (prolly in Airborne, with JumpRise being similar) Staircases? (in grounded, need to add more to Context when impling, imo)
+        // TODO handling gravity? (prolly in Airborne, with JumpRise being similar)
         // TODO renaming contexts? rn they're just data containers for references and values, and they can be mutated, which feels weird...
 
-        ComputeVelocity();
+        // compute the "lateral" velocity for this frame
+        m_context.LateralVelocity = ComputeBaseVelocity(m_context.LateralVelocity);
+
+        // if we need to stick to a surface...
+        float sticky_velocity = 0f;
+        if (m_context.DistanceToStickySurface > 0)
+        {
+            //...calculate it...
+            sticky_velocity = AddStickyForceToVelocity(m_context.DistanceToStickySurface);
+        }
+
+        // ...note the scaled sticky velocity in our context
+        m_context.AdditiveYVelocity = sticky_velocity;
     }
 
-    private void ComputeVelocity()
+    private Vector3 ComputeBaseVelocity(Vector3 velocity)
     {
         var inputs = m_context.MovementInput;
         var surface_normal = m_context.SurfaceNormal;
@@ -88,20 +95,30 @@ public class GroundedState : AMovementSubState
         var target_ground_velocity = forward_vec + right_vec;
 
         // if we're using delta acceleration modifiers, compute the additional bonus acceleration now
-        float accel_bonus = config.UseDeltaAccelerationModifier ? ComputeDeltaAcceleration(inputs, m_velocity) : 0;
+        float accel_bonus = config.UseDeltaAccelerationModifier ? ComputeDeltaAcceleration(inputs, velocity) : 0;
 
         // change our velocity towards our target velo up to a magnitude determined by our acceleration
-        m_velocity = Vector3.MoveTowards(
-                m_velocity,
+        return Vector3.MoveTowards(
+                velocity,
                 target_ground_velocity,
                 (accel_bonus + config.Acceleration) * Time.deltaTime);
     }
 
-    private float ComputeDeltaAcceleration(Vector2 normalized_dir, Vector2 non_normalized_velo)
+    private float AddStickyForceToVelocity(float sticky_distance)
+    {
+        // no acceleration, applies instantly
+        // only scaled when applied to the CC
+        return -sticky_distance * m_context.ConfigData.StickyForceScalar;
+    }
+
+    private float ComputeDeltaAcceleration(Vector2 n_input_dir, Vector2 non_normalized_velo)
     {
         if (non_normalized_velo.magnitude < 0.5f) return 0f;
 
-        return m_context.ConfigData.NormalizedDeltaAccelerationCurve.Evaluate(Vector2.Dot(non_normalized_velo.normalized, normalized_dir))
+        var flattened = non_normalized_velo;
+        flattened.y = 0f;
+
+        return m_context.ConfigData.NormalizedDeltaAccelerationCurve.Evaluate(Vector2.Dot(flattened.normalized, n_input_dir))
                 * m_context.ConfigData.DeltaAccelerationMagnitude;
     }
 }

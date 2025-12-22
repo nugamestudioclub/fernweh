@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc718e922207a6140a941129eb02fbf9, type: 3}
+  m_Name: ConfigData
+  m_EditorClassIdentifier: 
+  JumpBufferDuration: 0.1
+  CoyoteDuration: 0.05
+  SpherecastOriginTransformTag: CastOrigin
+  GroundSpherecastDistance: 0.575
+  GroundSpherecastRadius: 0.5
+  GroundSpherecastMask:
+    serializedVersion: 2
+    m_Bits: 1
+  RaycastOriginTransformTag: CastOrigin
+  StickyRaycastDistance: 1.5
+  StickyRaycastMask:
+    serializedVersion: 2
+    m_Bits: 1
+  MaxGroundVelocityMagnitude: 10
+  Acceleration: 60
+  StickyForceScalar: 0
+  UseDeltaAccelerationModifier: 1
+  NormalizedDeltaAccelerationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.3
+      value: 0
+      inSlope: -0.012646515
+      outSlope: Infinity
+      tangentMode: 97
+      weightedMode: 0
+      inWeight: 0.06882593
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  DeltaAccelerationMagnitude: 100

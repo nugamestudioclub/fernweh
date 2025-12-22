@@ -13,7 +13,7 @@ public class AirborneState : AMovementSubState
         throw new System.NotImplementedException();
     }
     
-    public override bool TryCheckForExits(out string state_name)
+    public override bool TryCheckForExits(out MovementState.State state_enum)
     {
         throw new System.NotImplementedException();
     }

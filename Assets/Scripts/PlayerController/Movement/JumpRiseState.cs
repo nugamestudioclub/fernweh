@@ -14,7 +14,7 @@ public class JumpRiseState : AMovementSubState
     }
 
     
-    public override bool TryCheckForExits(out string state_name)
+    public override bool TryCheckForExits(out MovementState.State state_name)
     {
         throw new System.NotImplementedException();
     }

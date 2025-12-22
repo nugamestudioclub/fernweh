@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ConfigData", menuName = "ScriptableObject", order = 0)]
+[CreateAssetMenu(fileName = "ConfigData", menuName = "ScriptableObject/ConfigData", order = 0)]
 public class PlayerControllerConfigSO : ScriptableObject
 {
     [Space]
@@ -16,9 +16,17 @@ public class PlayerControllerConfigSO : ScriptableObject
     public LayerMask GroundSpherecastMask;
 
     [Space]
+    [Header("Sticky Raycast Config")]
+    public string RaycastOriginTransformTag;
+    public float StickyRaycastDistance;
+    public LayerMask StickyRaycastMask;
+
+    [Space]
     [Header("Movement")]
     public float MaxGroundVelocityMagnitude;
     public float Acceleration;
+    [Tooltip("The force to be applied per unit distance when stickiness to ground surface take effect. A positive value.")] 
+    public float StickyForceScalar;
 
     [Header("Delta Acceleration")]
     public bool UseDeltaAccelerationModifier = true;

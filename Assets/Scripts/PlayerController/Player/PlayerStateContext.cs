@@ -8,7 +8,7 @@ public class PlayerStateContext : MonoBehaviour, IStateContext
     // these should be private-write, public-read, rather than public-all
     public bool IsOnZipline;
 
-    public CharacterController CharacterController;
+    [HideInInspector] public CharacterController CharacterController;
 
     public void UpdateContext()
     {

@@ -1,15 +1,28 @@
 using UnityEngine;
 
-public class PlayerStateMachine : AStateMachine<PlayerStateContext, IState<PlayerStateContext>> // currently does not need an abstract state.
+public class PlayerStateMachine : 
+    AStateMachine<
+        PlayerStateContext, 
+        IState<PlayerStateContext, PlayerStateMachine.State>, 
+        PlayerStateMachine.State> // currently does not need an abstract state.
 {
+    public enum State
+    {
+        Movement,
+        OnZipline
+    }
+
     private readonly MovementStateContext m_movementSubmachineContext;
 
     public PlayerStateMachine(MovementStateContext submachine_context)
     {
         m_movementSubmachineContext = submachine_context;
+
+        // DEBUG
+        ChangeState(new MovementState());
     }
 
-    protected override void CheckForSubmachineContext(IState<PlayerStateContext> in_state)
+    protected override void CheckForSubmachineContext(IState<PlayerStateContext, PlayerStateMachine.State> in_state)
     {
         // this feels weird...
         // TODO:
@@ -21,7 +34,7 @@ public class PlayerStateMachine : AStateMachine<PlayerStateContext, IState<Playe
         }
     }
 
-    protected override IState<PlayerStateContext> FactoryProduceState(string state_name)
+    public override IState<PlayerStateContext, State> FactoryProduceState(State state_name)
     {
         return default; // STUB
     }

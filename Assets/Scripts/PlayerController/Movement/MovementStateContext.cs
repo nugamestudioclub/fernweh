@@ -8,10 +8,18 @@ public class MovementStateContext : MonoBehaviour, IStateContext
     public PlayerControllerConfigSO ConfigData;
 
     // ---------------- public read-write ----------------
+    // TODO: Separate this into public read, and public read-write? Not all of these need to be mutated outside this class.
     [HideInInspector] public AirState AirState;
 
     [HideInInspector] public Vector2 MovementInput;
     [HideInInspector] public TemporaryBoolean HasQueuedJumpAction; // have we input a jump action recently?
+
+    // Not really "lateral" velocity, but moreso the velocity on the plane defined by the surface we
+    // are sticking on (see Surface Normal and Sticky). It's basically on the XZ plane of the surface's
+    // local transform, but in world space (so we do sometimes have a Y component if the plane is tilted in
+    // world space, for instance).
+    [HideInInspector] public Vector3 LateralVelocity;
+    [HideInInspector] public float AdditiveYVelocity;
 
     // can we perform the ground-checK raycast?
     // this is mutated when actions occur that should prevent a ground raycast check,
@@ -21,9 +29,14 @@ public class MovementStateContext : MonoBehaviour, IStateContext
 
     [HideInInspector] public bool CanEnterCoyoteState;
 
-    [HideInInspector] public Vector3 SurfaceNormal;
+    // how far we are from a surface we need to stick to
+    // the further we are, the stronger our attraction force to the ground should be
+    // so we don't detach from the surface (like on descending stairs)
+    //
+    // If negative, we don't have a sticky surface in reach.
+    [HideInInspector] public float DistanceToStickySurface;
 
-    [HideInInspector] public CharacterController CharacterController;
+    [HideInInspector] public Vector3 SurfaceNormal;
 
     // ---------------- private exposed ----------------
     // none. private exposed things are usually config data, which go in the SO.
@@ -32,14 +45,21 @@ public class MovementStateContext : MonoBehaviour, IStateContext
     private InputAction m_movementAction;
     private InputAction m_jumpAction;
 
-    private Transform m_originTransform;
+    private Transform m_spherecastOrigin;
+    private Transform m_raycastOrigin;
 
     private void Awake()
     {
-        var origin_go = GameObject.FindGameObjectWithTag(ConfigData.SpherecastOriginTransformTag);
-        if (origin_go == null) throw new System.ArgumentException("Cannot find object with tag: " + ConfigData.SpherecastOriginTransformTag);
+        var origin_go_s = GameObject.FindGameObjectWithTag(ConfigData.SpherecastOriginTransformTag);
+        if (origin_go_s == null) throw new System.ArgumentException("Cannot find object with tag: " + ConfigData.SpherecastOriginTransformTag);
 
-        m_originTransform = origin_go.transform;
+        m_spherecastOrigin = origin_go_s.transform;
+
+        var origin_go_r = GameObject.FindGameObjectWithTag(ConfigData.RaycastOriginTransformTag);
+        if (origin_go_r == null) throw new System.ArgumentException("Cannot find object with tag: " + ConfigData.RaycastOriginTransformTag);
+
+        m_raycastOrigin = origin_go_r.transform;
+
 
         m_movementAction = InputSystem.actions.FindAction("Move");
         m_jumpAction = InputSystem.actions.FindAction("Jump");
@@ -52,8 +72,25 @@ public class MovementStateContext : MonoBehaviour, IStateContext
 
     public void UpdateContext()
     {
+        PerformGroundSpherecast();
+
+        PerformStickyRaycast();
+
+        TickTemporaryBooleans();
+
+        MovementInput = m_movementAction.ReadValue<Vector2>();
+        
+        // if jump action down, start timer (even if it was already started)
+        if (m_jumpAction.ReadValue<float>() > 0.5f)
+        {
+            HasQueuedJumpAction.SetActive(ConfigData.JumpBufferDuration);
+        }
+    }
+
+    private void PerformGroundSpherecast()
+    {
         bool did_hit = Physics.SphereCast(
-            m_originTransform.position,
+            m_spherecastOrigin.position,
             ConfigData.GroundSpherecastRadius, Vector3.down, out var hit,
             ConfigData.GroundSpherecastDistance,
             ConfigData.GroundSpherecastMask);
@@ -69,7 +106,7 @@ public class MovementStateContext : MonoBehaviour, IStateContext
             CanEnterCoyoteState = true; // recharge coyote state
         }
         // are we okay to check, and we just missed?
-        else if (!IsJumpGroundcastLocked.IsTrue) 
+        else if (!IsJumpGroundcastLocked.IsTrue)
         {
             // if we're not already doing coyote time and can do it, set state and start the timer.
             // otherwise, dont restart it.
@@ -90,17 +127,29 @@ public class MovementStateContext : MonoBehaviour, IStateContext
                 AirState = AirState.Airborne;
             }
         }
+    }
 
+    private void PerformStickyRaycast()
+    {
+        bool did_hit = Physics.Raycast(
+            m_raycastOrigin.position, Vector3.down, out var hit,
+            ConfigData.StickyRaycastDistance,
+            ConfigData.StickyRaycastMask);
+
+        if (did_hit)
+        {
+            DistanceToStickySurface = hit.distance;
+        }
+        else
+        {
+            DistanceToStickySurface = -1f;
+        }
+    }
+
+    private void TickTemporaryBooleans()
+    {
         HasQueuedJumpAction.Tick(Time.deltaTime);
         IsCoyoteTimerActive.Tick(Time.deltaTime);
         IsJumpGroundcastLocked.Tick(Time.deltaTime);
-
-        MovementInput = m_movementAction.ReadValue<Vector2>();
-        
-        // if jump action down, start timer (even if it was already started)
-        if (m_jumpAction.ReadValue<float>() > 0.5f)
-        {
-            HasQueuedJumpAction.SetActive(ConfigData.JumpBufferDuration);
-        }
     }
 }

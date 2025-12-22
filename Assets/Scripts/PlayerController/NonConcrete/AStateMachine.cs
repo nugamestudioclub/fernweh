@@ -1,6 +1,8 @@
-public abstract class AStateMachine<C, S> : IStateMachine<C, S> where C : IStateContext where S : IState<C>
+using System;
+
+public abstract class AStateMachine<C, S, E> : IStateMachine<C, S, E> where C : IStateContext where S : IState<C, E> where E : Enum
 {
-    protected C p_context;
+    protected C p_contextForStates;
 
     private S m_currentState;
 
@@ -11,16 +13,18 @@ public abstract class AStateMachine<C, S> : IStateMachine<C, S> where C : IState
         m_currentState = to_state;
         CheckForSubmachineContext(m_currentState);
 
+        m_currentState.SetStateContext(p_contextForStates);
+
         m_currentState.Enter();
     }
 
-    public void SetContext(C context) => p_context = context;
+    public void SetContext(C context) => p_contextForStates = context;
 
     public void MachineUpdate()
     {
-        p_context.UpdateContext();
+        p_contextForStates.UpdateContext();
         
-        if (m_currentState != null && m_currentState.TryCheckForExits(out string exit_to_state))
+        if (m_currentState != null && m_currentState.TryCheckForExits(out E exit_to_state))
         {
             ChangeState(FactoryProduceState(exit_to_state));
         }
@@ -28,7 +32,7 @@ public abstract class AStateMachine<C, S> : IStateMachine<C, S> where C : IState
         m_currentState.StateUpdate();
     }
 
-    protected abstract S FactoryProduceState(string state_name);
+    public abstract S FactoryProduceState(E state_enum);
 
     protected S GetCurrentState() => m_currentState;
 

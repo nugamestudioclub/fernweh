@@ -1,6 +1,6 @@
-using UnityEngine;
+using System.Numerics;
 
-public abstract class AMovementSubState : IState<MovementStateContext>
+public abstract class AMovementSubState : IState<MovementStateContext, MovementState.State>
 {
     protected MovementStateContext p_context;
 
@@ -8,7 +8,7 @@ public abstract class AMovementSubState : IState<MovementStateContext>
 
     public abstract void StateUpdate();
 
-    public abstract bool TryCheckForExits(out string state_name);
+    public abstract bool TryCheckForExits(out MovementState.State state_name);
 
     public virtual void Enter() { }
 
