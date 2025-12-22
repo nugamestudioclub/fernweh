@@ -13,8 +13,10 @@ public class MovementState :
 
     private PlayerStateContext m_myContext;
 
-    public MovementState()
+    public MovementState(MovementStateContext context_for_states)
     {
+        p_contextForStates = context_for_states;
+
         // DEBUG
         ChangeState(new GroundedState());
     }

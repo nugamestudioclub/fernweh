@@ -27,7 +27,7 @@ MonoBehaviour:
     m_Bits: 1
   MaxGroundVelocityMagnitude: 10
   Acceleration: 60
-  StickyForceScalar: 0
+  StickyForceScalar: 5
   UseDeltaAccelerationModifier: 1
   NormalizedDeltaAccelerationCurve:
     serializedVersion: 2

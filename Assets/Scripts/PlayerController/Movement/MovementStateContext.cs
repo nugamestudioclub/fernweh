@@ -50,6 +50,7 @@ public class MovementStateContext : MonoBehaviour, IStateContext
 
     private void Awake()
     {
+        // caching transforms for cast origins
         var origin_go_s = GameObject.FindGameObjectWithTag(ConfigData.SpherecastOriginTransformTag);
         if (origin_go_s == null) throw new System.ArgumentException("Cannot find object with tag: " + ConfigData.SpherecastOriginTransformTag);
 
@@ -60,14 +61,16 @@ public class MovementStateContext : MonoBehaviour, IStateContext
 
         m_raycastOrigin = origin_go_r.transform;
 
-
+        // input actions
         m_movementAction = InputSystem.actions.FindAction("Move");
         m_jumpAction = InputSystem.actions.FindAction("Jump");
 
+        // default state is grounded
         AirState = AirState.Grounded;
 
         HasQueuedJumpAction = new TemporaryBoolean();
         IsCoyoteTimerActive = new TemporaryBoolean();
+        IsJumpGroundcastLocked = new TemporaryBoolean();
     }
 
     public void UpdateContext()

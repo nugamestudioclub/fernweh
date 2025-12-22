@@ -10,6 +10,11 @@ public class PlayerStateContext : MonoBehaviour, IStateContext
 
     [HideInInspector] public CharacterController CharacterController;
 
+    private void Awake()
+    {
+        CharacterController = GetComponent<CharacterController>();
+    }
+
     public void UpdateContext()
     {
         // stub

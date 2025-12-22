@@ -4,7 +4,7 @@ public class PlayerStateMachine :
     AStateMachine<
         PlayerStateContext, 
         IState<PlayerStateContext, PlayerStateMachine.State>, 
-        PlayerStateMachine.State> // currently does not need an abstract state.
+        PlayerStateMachine.State> // currently does not need an abstract move_state.
 {
     public enum State
     {
@@ -17,25 +17,15 @@ public class PlayerStateMachine :
     public PlayerStateMachine(MovementStateContext submachine_context)
     {
         m_movementSubmachineContext = submachine_context;
-
-        // DEBUG
-        ChangeState(new MovementState());
     }
 
-    protected override void CheckForSubmachineContext(IState<PlayerStateContext, PlayerStateMachine.State> in_state)
+    public override IState<PlayerStateContext, State> FactoryProduceState(State state_enum)
     {
-        // this feels weird...
-        // TODO:
-        // it could be resolved if movement context was a part of the player context
-        // the MovementState could instead derive the movement context from the player context it owns as a part of being a State.
-        if (in_state is MovementState state)
+        return state_enum switch
         {
-            state.SetContext(m_movementSubmachineContext);
-        }
-    }
-
-    public override IState<PlayerStateContext, State> FactoryProduceState(State state_name)
-    {
-        return default; // STUB
+            State.Movement => new MovementState(m_movementSubmachineContext),
+            State.OnZipline => default, // TEMP
+            _ => throw new System.ArgumentException("Invalid state enum: " + state_enum),
+        };
     }
 }

@@ -11,7 +11,6 @@ public abstract class AStateMachine<C, S, E> : IStateMachine<C, S, E> where C : 
         m_currentState?.Exit();
 
         m_currentState = to_state;
-        CheckForSubmachineContext(m_currentState);
 
         m_currentState.SetStateContext(p_contextForStates);
 
@@ -35,8 +34,4 @@ public abstract class AStateMachine<C, S, E> : IStateMachine<C, S, E> where C : 
     public abstract S FactoryProduceState(E state_enum);
 
     protected S GetCurrentState() => m_currentState;
-
-    // if the next state is a submachine that needs a context reference, pass it the one it needs.
-    // hacky?
-    protected virtual void CheckForSubmachineContext(S in_state) { }
 }
