@@ -21,10 +21,15 @@ public class MovementState :
         ChangeState(new GroundedState());
     }
     
-    public bool TryCheckForExits(out PlayerStateMachine.State state_name)
+    public bool TryCheckForExits(out PlayerStateMachine.State state_enum)
     {
-        // stub
-        state_name = default;
+        if (m_myContext.IsOnZipline)
+        {
+            state_enum = PlayerStateMachine.State.OnZipline;
+            return true;
+        }
+
+        state_enum = default;
         return false;
     }
 

@@ -7,6 +7,10 @@ public class PlayerControllerConfigSO : ScriptableObject
     [Header("Jumping and Coyote Time")]
     public float JumpBufferDuration; // 0.1f;
     public float CoyoteDuration; // 0.05f
+    public float MaxFallSpeed;
+    public AnimationCurve NormalizedJumpForceCurve;
+    public float JumpForce;
+    public float FinalKeyTimestamp { get => NormalizedJumpForceCurve.keys[^1].time; }
 
     [Space]
     [Header("Ground Spherecast Config")]

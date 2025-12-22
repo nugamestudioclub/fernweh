@@ -12,6 +12,7 @@ public class MovementStateContext : MonoBehaviour, IStateContext
     [HideInInspector] public AirState AirState;
 
     [HideInInspector] public Vector2 MovementInput;
+    [HideInInspector] public bool IsJumpDown;
     [HideInInspector] public TemporaryBoolean HasQueuedJumpAction; // have we input a jump action recently?
 
     // Not really "lateral" velocity, but moreso the velocity on the plane defined by the surface we
@@ -75,13 +76,15 @@ public class MovementStateContext : MonoBehaviour, IStateContext
 
     public void UpdateContext()
     {
-        PerformGroundSpherecast();
-
         PerformStickyRaycast();
+
+        // ground spherecast data handling needs updated sticky ray information
+        PerformGroundSpherecast();
 
         TickTemporaryBooleans();
 
         MovementInput = m_movementAction.ReadValue<Vector2>();
+        IsJumpDown = m_jumpAction.IsPressed();
         
         // if jump action down, start timer (even if it was already started)
         if (m_jumpAction.ReadValue<float>() > 0.5f)
@@ -98,9 +101,18 @@ public class MovementStateContext : MonoBehaviour, IStateContext
             ConfigData.GroundSpherecastDistance,
             ConfigData.GroundSpherecastMask);
 
+        // see below for the logical explanation of this
+        bool is_already_grounded = AirState == AirState.Grounded;
+        bool grounded_this_frame = is_already_grounded ? did_hit || HasStickySurface() : did_hit;
+        
         SurfaceNormal = Vector3.zero;
+
         // are we okay to check if grounded and we ARE grounded?
-        if (!IsJumpGroundcastLocked.IsTrue && did_hit)
+        // grounded in this context has two cases depending on if we were grounded the previous frame (i.e.
+        // we have a surface to stick to). 
+        // 1. We are landing onto the ground. Dont use the extended sticky ray as a ground check.
+        // 2. We are walking on ground. Use the sticky ray to say we're still grounded.
+        if (!IsJumpGroundcastLocked.IsTrue && grounded_this_frame)
         {
             AirState = AirState.Grounded;
             SurfaceNormal = hit.normal;
@@ -155,4 +167,6 @@ public class MovementStateContext : MonoBehaviour, IStateContext
         IsCoyoteTimerActive.Tick(Time.deltaTime);
         IsJumpGroundcastLocked.Tick(Time.deltaTime);
     }
+
+    private bool HasStickySurface() => DistanceToStickySurface > 0f;
 }

@@ -12,6 +12,8 @@ public abstract class AStateMachine<C, S, E> : IStateMachine<C, S, E> where C : 
 
         m_currentState = to_state;
 
+        UnityEngine.Debug.Log("Changing to state: " + m_currentState.GetType().Name);
+
         m_currentState.SetStateContext(p_contextForStates);
 
         m_currentState.Enter();

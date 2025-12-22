@@ -14,8 +14,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   JumpBufferDuration: 0.1
   CoyoteDuration: 0.05
+  MaxFallSpeed: 25
+  NormalizedJumpForceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.015075684
+      value: 0.9964676
+      inSlope: -107.16344
+      outSlope: -2.054893
+      tangentMode: 65
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.019736841
+    - serializedVersion: 3
+      time: 0.5
+      value: 0
+      inSlope: -2.054893
+      outSlope: -0.16307952
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  JumpForce: 15
   SpherecastOriginTransformTag: CastOrigin
-  GroundSpherecastDistance: 0.575
+  GroundSpherecastDistance: 0.65
   GroundSpherecastRadius: 0.5
   GroundSpherecastMask:
     serializedVersion: 2

@@ -4424,6 +4424,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsOnZipline: 0
+  MountedLine: {fileID: 0}
   CharacterController: {fileID: 0}
 --- !u!114 &1426346514
 MonoBehaviour:
@@ -4441,6 +4442,7 @@ MonoBehaviour:
   ConfigData: {fileID: 11400000, guid: f4792548a58f1e049ad1b98c7fd85c20, type: 2}
   AirState: 0
   MovementInput: {x: 0, y: 0}
+  IsJumpDown: 0
   LateralVelocity: {x: 0, y: 0, z: 0}
   AdditiveYVelocity: 0
   CanEnterCoyoteState: 0
@@ -4455,7 +4457,7 @@ Transform:
   m_GameObject: {fileID: 1426346511}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.505, z: 0}
+  m_LocalPosition: {x: 0, y: 2.15, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4830,6 +4832,7 @@ GameObject:
   - component: {fileID: 1709944554}
   - component: {fileID: 1709944553}
   - component: {fileID: 1709944555}
+  - component: {fileID: 1709944556}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -4940,6 +4943,18 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!114 &1709944556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709944552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e791bba6eb45b274e936fa98a5a49481, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1879247456
 GameObject:
   m_ObjectHideFlags: 0
