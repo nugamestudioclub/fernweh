@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class DroneStateMachine : 
     AStateMachine<
         DroneStateContext, 
@@ -15,6 +13,10 @@ public class DroneStateMachine :
 
     public override IState<DroneStateContext, State> FactoryProduceState(State state_enum)
     {
-        throw new System.NotImplementedException();
+        return state_enum switch
+        {
+            State.Orbit => new OrbitState(),
+            _ => throw new System.ArgumentException("Invalid state enum: " + state_enum),
+        };
     }
 }

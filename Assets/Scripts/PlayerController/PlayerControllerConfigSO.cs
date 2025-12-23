@@ -41,4 +41,11 @@ public class PlayerControllerConfigSO : ScriptableObject
     [Header("Zipline")]
     public float MaxDriveVelocityMagnitude;
     public float DriveAcceleration;
+
+    [Space]
+    [Header("Camera and Drone")]
+    public float OrbitRotationSensitivity;
+    public float OrbitDistance;
+    public LayerMask OrbitCollisionMask;
+    public float MaxPitchAngle;
 }

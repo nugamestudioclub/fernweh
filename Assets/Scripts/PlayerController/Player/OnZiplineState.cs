@@ -67,10 +67,10 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
     {
         float dot = Vector3.Dot(perspective_dir, current_line_dir);
 
-        if (dot < 0.2f && dot > 0f) dot = 0f; // if just above 0, make it 0
-        if (dot > -0.2f && dot < 0f) dot = 0f; // if just below 0, make it 0
-        if (dot > 0.7f) dot = 1f; // if just under 1, make it 1
-        if (dot < -0.7f) dot = -1f; // if just above 1, make it -1
+        if (dot < 0.05f && dot > 0f) dot = 0f; // if just above 0, make it 0
+        if (dot > -0.05f && dot < 0f) dot = 0f; // if just below 0, make it 0
+        if (dot > 0.95f) dot = 1f; // if just under 1, make it 1
+        if (dot < -0.95f) dot = -1f; // if just above 1, make it -1
 
         return dot * current_line_dir;
     }

@@ -89,5 +89,11 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   DeltaAccelerationMagnitude: 100
-  MaxDriveVelocityMagnitude: 20
-  DriveAcceleration: 10
+  MaxDriveVelocityMagnitude: 40
+  DriveAcceleration: 20
+  OrbitRotationSensitivity: 3
+  OrbitDistance: 8.5
+  OrbitCollisionMask:
+    serializedVersion: 2
+    m_Bits: 1
+  MaxPitchAngle: 80
