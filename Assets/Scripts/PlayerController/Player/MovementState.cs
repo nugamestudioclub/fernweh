@@ -17,8 +17,28 @@ public class MovementState :
     {
         p_contextForStates = context_for_states;
 
-        // DEBUG
-        ChangeState(new GroundedState());
+        // "smartly" decide what state to enter depending on the context.
+        // This works because the player state context cant keep its grubby little
+        // mitts off the movement state context (intentional choice), indicating through
+        // the AirState what state the movement subsystem should start in.
+        AMovementSubState target_state;
+        if (p_contextForStates.AirState == AirState.Airborne)
+        {
+            if (p_contextForStates.IsJumpDown)
+            {
+                target_state = new JumpRiseState();
+            }
+            else
+            {
+                target_state = new AirborneState();
+            }
+        }
+        else 
+        {
+            target_state = new GroundedState();
+        }
+
+        ChangeState(target_state);
     }
     
     public bool TryCheckForExits(out PlayerStateMachine.State state_enum)

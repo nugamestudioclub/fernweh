@@ -1,13 +1,16 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerStateContext : MonoBehaviour, IStateContext
 {
     // fields and properties here
+    public MovementStateContext SubmachineStateContext;
+    public Transform LineRiderAnchorTransform;
 
-    // Semi-debug, semi-stub, semi-partial implementation
-    // these should be private-write, public-read, rather than public-all
-    public bool IsOnZipline;
-    public ZiplineObject MountedLine;
+    // ---------------- public read-write ----------------
+    [HideInInspector] public bool IsOnZipline;
+    [HideInInspector] public Vector3 HitPoint; // INVARIANT: if IsOnZipline, HitPoint != Vec.Zero
+    [HideInInspector] public ZiplineObject MountedLine; // INVARIANT: if IsOnZipline, MountedLine != null
 
     [HideInInspector] public CharacterController CharacterController;
 
@@ -18,6 +21,23 @@ public class PlayerStateContext : MonoBehaviour, IStateContext
 
     public void UpdateContext()
     {
-        // stub
+        // don't fully update the substate context because we don't care about most of it.
+        SubmachineStateContext.UpdateInputs();
+
+        if (SubmachineStateContext.IsJumpDown && IsOnZipline)
+        {
+            MountedLine.Dismount();
+
+            IsOnZipline = false;
+            MountedLine = null;
+        }
+    }
+
+    public void MountLine(ZiplineObject line, Vector3 hit_point)
+    {
+        IsOnZipline = true;
+        MountedLine = line;
+
+        HitPoint = hit_point;
     }
 }

@@ -22,7 +22,9 @@ public class ZiplineObject : MonoBehaviour
     {
         m_lineRenderer = GetComponent<LineRenderer>();
         m_isScanLockedOut = new TemporaryBoolean();
-
+    }
+    private void Start()
+    {
         if (m_startPosition != Vector3.zero || m_endPosition != Vector3.zero) UpdateAnchors();
     }
 
@@ -45,7 +47,7 @@ public class ZiplineObject : MonoBehaviour
 
         m_doScanForRider = true;
 
-        GizmoDebug.Instance.DrawSphereRay(m_startPosition, m_endPosition, 0.5f, Color.red);
+        //GizmoDebug.Instance.DrawSphereRay(m_startPosition, m_endPosition, 0.5f, Color.red);
     }
 
     private void Update()
@@ -53,13 +55,12 @@ public class ZiplineObject : MonoBehaviour
         m_isScanLockedOut.Tick(Time.deltaTime);
 
         if (m_doScanForRider && !m_hasRider && !m_isScanLockedOut.IsTrue
-            && Physics.SphereCast(m_startPosition, 0.5f, m_endPosition - m_startPosition, out var hit, float.MaxValue, m_riderLayer)
-            && hit.collider.TryGetComponent<PlayerStateContext>(out var player_context))
+            && Physics.SphereCast(m_startPosition, 0.1f, m_endPosition - m_startPosition, out var hit, float.MaxValue, m_riderLayer)
+            && hit.transform.parent.TryGetComponent<PlayerStateContext>(out var player_context))
         {
             m_hasRider = true;
 
-            player_context.IsOnZipline = true;
-            player_context.MountedLine = this;
+            player_context.MountLine(this, hit.point);
 
             //component.enabled = true;
             //component.RideLine(this, hit.distance);
@@ -68,9 +69,7 @@ public class ZiplineObject : MonoBehaviour
 
     public void Dismount()
     {
-        // TODO
         m_hasRider = false;
-
         m_isScanLockedOut.SetActive(m_lockoutDuration);
     }
 
@@ -99,5 +98,17 @@ public class ZiplineObject : MonoBehaviour
 
         start_orb.transform.position = m_startPosition;
         end_orb.transform.position = m_endPosition;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(m_startPosition, 0.25f);
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawLine(m_startPosition, m_endPosition);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(m_endPosition, 0.25f);
     }
 }

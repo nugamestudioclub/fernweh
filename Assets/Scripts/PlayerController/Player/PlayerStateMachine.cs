@@ -24,7 +24,7 @@ public class PlayerStateMachine :
         return state_enum switch
         {
             State.Movement => new MovementState(m_movementSubmachineContext),
-            State.OnZipline => default, // TEMP
+            State.OnZipline => new OnZiplineState(),
             _ => throw new System.ArgumentException("Invalid state enum: " + state_enum),
         };
     }

@@ -36,4 +36,9 @@ public class PlayerControllerConfigSO : ScriptableObject
     public bool UseDeltaAccelerationModifier = true;
     public AnimationCurve NormalizedDeltaAccelerationCurve;
     public float DeltaAccelerationMagnitude;
+
+    [Space]
+    [Header("Zipline")]
+    public float MaxDriveVelocityMagnitude;
+    public float DriveAcceleration;
 }

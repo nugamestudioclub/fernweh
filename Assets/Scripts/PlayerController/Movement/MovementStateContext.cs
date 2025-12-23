@@ -19,6 +19,9 @@ public class MovementStateContext : MonoBehaviour, IStateContext
     // are sticking on (see Surface Normal and Sticky). It's basically on the XZ plane of the surface's
     // local transform, but in world space (so we do sometimes have a Y component if the plane is tilted in
     // world space, for instance).
+    //
+    // Also used by the Player SuperStatemachine to store Line-travel velocity. Allows for line velocity to
+    // be carried over into the submachine, which is nice.
     [HideInInspector] public Vector3 LateralVelocity;
     [HideInInspector] public float AdditiveYVelocity;
 
@@ -74,6 +77,12 @@ public class MovementStateContext : MonoBehaviour, IStateContext
         IsJumpGroundcastLocked = new TemporaryBoolean();
     }
 
+    public void UpdateInputs()
+    {
+        MovementInput = m_movementAction.ReadValue<Vector2>();
+        IsJumpDown = m_jumpAction.IsPressed();
+    }
+
     public void UpdateContext()
     {
         PerformStickyRaycast();
@@ -83,8 +92,7 @@ public class MovementStateContext : MonoBehaviour, IStateContext
 
         TickTemporaryBooleans();
 
-        MovementInput = m_movementAction.ReadValue<Vector2>();
-        IsJumpDown = m_jumpAction.IsPressed();
+        UpdateInputs();
         
         // if jump action down, start timer (even if it was already started)
         if (m_jumpAction.ReadValue<float>() > 0.5f)

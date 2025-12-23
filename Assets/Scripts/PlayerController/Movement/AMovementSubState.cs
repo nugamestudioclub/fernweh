@@ -22,7 +22,7 @@ public abstract class AMovementSubState : IState<MovementStateContext, MovementS
 
     protected Vector3 ComputeBaseVelocity(Vector3 velocity)
     {
-        var inputs = p_context.MovementInput;
+        var inputs = p_context.MovementInput.normalized;
         var surface_normal = p_context.SurfaceNormal;
         var perspective = p_context.PointOfView;
         var config = p_context.ConfigData;
