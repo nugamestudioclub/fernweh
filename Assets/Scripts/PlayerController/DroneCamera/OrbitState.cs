@@ -35,7 +35,7 @@ public class OrbitState : ADroneState
         Debug.DrawRay(ray_origin, collision_dir *  distance_to_focus, Color.red);
 
         // update target's pos and rot so we can lerp to it
-        p_context.TargetCameraTransform.SetPositionAndRotation(
+        p_context.TargetTransform.SetPositionAndRotation(
             ray_origin + collision_dir * distance_to_focus,
             Quaternion.Euler(pitch, yaw, 0f));
         
@@ -43,7 +43,7 @@ public class OrbitState : ADroneState
         p_context.CameraTransform.SetPositionAndRotation(
             Vector3.Lerp(
                 p_context.CameraTransform.position,
-                p_context.TargetCameraTransform.position,
+                p_context.TargetTransform.position,
                 10f * Time.deltaTime), 
             Quaternion.Lerp(
                 p_context.CameraTransform.rotation,
@@ -71,11 +71,11 @@ public class OrbitState : ADroneState
     // for Enter and Exit
     private void FlipCorrect()
     {
-        var eulers = p_context.TargetCameraTransform.eulerAngles;
+        var eulers = p_context.TargetTransform.eulerAngles;
         eulers.y -= 180;
         eulers.x *= -1;
 
-        p_context.TargetCameraTransform.eulerAngles = eulers;
+        p_context.TargetTransform.eulerAngles = eulers;
     }
 
     public override bool TryCheckForExits(out DroneStateMachine.State state_enum)
@@ -83,6 +83,12 @@ public class OrbitState : ADroneState
         if (p_context.ToggleDroneState)
         {
             state_enum = DroneStateMachine.State.Drone;
+            return true;
+        }
+
+        if (p_context.ToggleAimState)
+        {
+            state_enum = DroneStateMachine.State.Aim;
             return true;
         }
 

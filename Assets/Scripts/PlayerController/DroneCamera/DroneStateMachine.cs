@@ -17,6 +17,7 @@ public class DroneStateMachine :
         {
             State.Orbit => new OrbitState(),
             State.Drone => new DroneFlightState(),
+            State.Aim => new AimState(),
             _ => throw new System.ArgumentException("Invalid state enum: " + state_enum),
         };
     }

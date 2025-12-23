@@ -51,5 +51,8 @@ public class PlayerControllerConfigSO : ScriptableObject
     public float CameraRadius;
 
     [Space]
+    public Vector3 AimPerchOffset;
+
+    [Space]
     public float DroneFlySpeed;
 }

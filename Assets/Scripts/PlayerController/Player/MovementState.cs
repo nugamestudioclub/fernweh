@@ -72,8 +72,8 @@ public class MovementState :
 
     public void SetStateContext(PlayerStateContext context) => m_myContext = context;
     public PlayerStateMachine.State GetStateEnum() => STATE_ENUM;
-    public void Enter() { Debug.Log("Entered Movement."); }
-    public void Exit() { Debug.Log("Exited Movement."); }
+    public void Enter() { }
+    public void Exit() { }
 
     public override AMovementSubState FactoryProduceState(State state_enum)
     {

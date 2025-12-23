@@ -14,7 +14,7 @@ public abstract class ADroneState : IState<DroneStateContext, DroneStateMachine.
     protected (float yaw, float pitch) CalculateRotationFromInput()
     {
         float yaw =
-            p_context.TargetCameraTransform.eulerAngles.y
+            p_context.TargetTransform.eulerAngles.y
             + p_context.RotationInput.x
             * p_context.ConfigData.OrbitRotationSensitivity
             * Time.deltaTime;

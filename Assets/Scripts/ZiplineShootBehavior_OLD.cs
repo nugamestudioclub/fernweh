@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // currently shoots straight shots, not subject to gravity
-public class ZiplineShootBehavior : MonoBehaviour
+public class ZiplineShootBehavior_OLD : MonoBehaviour
 {
     [SerializeField] private Transform m_referencePOV;
     [SerializeField] private SpriteRenderer m_reticle;
@@ -29,7 +29,6 @@ public class ZiplineShootBehavior : MonoBehaviour
         m_fireZipline = InputSystem.actions.FindAction("Attack");
     }
 
-    // Entry and exit to this state is determined by Aim state and when it is entered.
     private void Update()
     {
         if (Physics.Raycast(m_referencePOV.position, m_referencePOV.forward, out var hit, m_maxDistance, m_hitMask))

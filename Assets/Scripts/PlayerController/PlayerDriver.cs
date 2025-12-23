@@ -1,10 +1,11 @@
 using UnityEngine;
 
-public class PlayerMachineDriver : MonoBehaviour
+public class PlayerDriver : MonoBehaviour
 {
     [SerializeField] private PlayerStateContext m_playerStateContext;
     [SerializeField] private MovementStateContext m_movementStateContext;
     [SerializeField] private DroneStateContext m_droneStateContext;
+    [SerializeField] private ZiplineShootBehavior m_shootBehavior;
 
     private PlayerStateMachine m_playerStateMachine;
     private DroneStateMachine m_droneStateMachine;
@@ -20,6 +21,10 @@ public class PlayerMachineDriver : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         m_droneStateMachine.OnStateChanged += CheckIfShouldIdle;
+        m_droneStateMachine.OnStateChanged += CheckIfShootState;
+
+        // ensure we dont start in shooting state
+        m_shootBehavior.gameObject.SetActive(false);
 
         // start machines
         m_playerStateMachine.ChangeState(m_playerStateMachine.FactoryProduceState(PlayerStateMachine.State.Movement));
@@ -35,7 +40,7 @@ public class PlayerMachineDriver : MonoBehaviour
     // a bit hacky for now, but this is generally how this sort of thing should go.
     // this might be better placed in the PlayerStateMachine (how to hook that up, ill think on it)
     private void CheckIfShouldIdle(
-        IState<DroneStateContext, DroneStateMachine.State> from, 
+        IState<DroneStateContext, DroneStateMachine.State> _, 
         IState<DroneStateContext, DroneStateMachine.State> to)
     {
         if (to.GetStateEnum() == DroneStateMachine.State.Drone)
@@ -45,6 +50,19 @@ public class PlayerMachineDriver : MonoBehaviour
         else
         {
             m_playerStateContext.IsPlayerLocked = false;
+        }
+    }
+    private void CheckIfShootState(
+        IState<DroneStateContext, DroneStateMachine.State> _,
+        IState<DroneStateContext, DroneStateMachine.State> to)
+    {
+        if (to.GetStateEnum() == DroneStateMachine.State.Aim)
+        {
+            m_shootBehavior.gameObject.SetActive(true);
+        }
+        else
+        {
+            m_shootBehavior.gameObject.SetActive(false);
         }
     }
 }

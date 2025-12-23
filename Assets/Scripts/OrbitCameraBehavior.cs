@@ -63,7 +63,7 @@ public class OrbitCameraBehavior : MonoBehaviour
     private void Awake()
     {
         // prototype code structural setup, so just do whatever comes easiest.
-        m_shootObject = FindFirstObjectByType<ZiplineShootBehavior>(FindObjectsInactive.Include).gameObject;
+        m_shootObject = FindFirstObjectByType<ZiplineShootBehavior_OLD>(FindObjectsInactive.Include).gameObject;
 
         Cursor.lockState = CursorLockMode.Locked;
 

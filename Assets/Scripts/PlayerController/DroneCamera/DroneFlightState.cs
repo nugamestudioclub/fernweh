@@ -12,7 +12,7 @@ public class DroneFlightState : ADroneState
 
         var direction = p_context.CameraTransform.TransformDirection(new Vector3(inputs.x, 0f, inputs.y));
 
-        var target_transform = p_context.TargetCameraTransform;
+        var target_transform = p_context.TargetTransform;
         var target_pos = target_transform.position + Time.deltaTime * p_context.ConfigData.DroneFlySpeed * direction;
 
         // kinda goofy addition, but collisions are just you bonking off of things
@@ -48,6 +48,12 @@ public class DroneFlightState : ADroneState
         if (p_context.ToggleDroneState) // TODO add distance constraint? Or does the drone always blink back to the player?
         {
             state_enum = DroneStateMachine.State.Orbit;
+            return true;
+        }
+
+        if (p_context.ToggleAimState)
+        {
+            state_enum = DroneStateMachine.State.Aim;
             return true;
         }
 

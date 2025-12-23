@@ -98,4 +98,5 @@ MonoBehaviour:
     m_Bits: 1
   MaxPitchAngle: 80
   CameraRadius: 0.25
+  AimPerchOffset: {x: -1.5, y: 0.5, z: -2.5}
   DroneFlySpeed: 15
