@@ -1,7 +1,7 @@
 using System;
 public interface IState<T, E> where T : IStateContext where E : Enum
 {
-    int GetExitPriority();
+    E GetStateEnum();
     void SetStateContext(T context);
 
     bool TryCheckForExits(out E state_enum);

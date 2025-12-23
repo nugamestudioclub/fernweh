@@ -9,7 +9,8 @@ public class PlayerStateMachine :
     public enum State
     {
         Movement,
-        OnZipline
+        OnZipline,
+        Idle
     }
 
     private readonly MovementStateContext m_movementSubmachineContext;
@@ -25,6 +26,7 @@ public class PlayerStateMachine :
         {
             State.Movement => new MovementState(m_movementSubmachineContext),
             State.OnZipline => new OnZiplineState(),
+            State.Idle => new IdleState(),
             _ => throw new System.ArgumentException("Invalid state enum: " + state_enum),
         };
     }

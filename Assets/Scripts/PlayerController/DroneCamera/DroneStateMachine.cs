@@ -16,6 +16,7 @@ public class DroneStateMachine :
         return state_enum switch
         {
             State.Orbit => new OrbitState(),
+            State.Drone => new DroneFlightState(),
             _ => throw new System.ArgumentException("Invalid state enum: " + state_enum),
         };
     }

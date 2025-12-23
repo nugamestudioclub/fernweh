@@ -48,4 +48,8 @@ public class PlayerControllerConfigSO : ScriptableObject
     public float OrbitDistance;
     public LayerMask OrbitCollisionMask;
     public float MaxPitchAngle;
+    public float CameraRadius;
+
+    [Space]
+    public float DroneFlySpeed;
 }

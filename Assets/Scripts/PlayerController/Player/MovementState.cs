@@ -11,6 +11,8 @@ public class MovementState :
         JumpRise
     }
 
+    private const PlayerStateMachine.State STATE_ENUM = PlayerStateMachine.State.Movement;
+
     private PlayerStateContext m_myContext;
 
     public MovementState(MovementStateContext context_for_states)
@@ -43,6 +45,12 @@ public class MovementState :
     
     public bool TryCheckForExits(out PlayerStateMachine.State state_enum)
     {
+        if (m_myContext.IsPlayerLocked)
+        {
+            state_enum = PlayerStateMachine.State.Idle;
+            return true;
+        }
+
         if (m_myContext.IsOnZipline)
         {
             state_enum = PlayerStateMachine.State.OnZipline;
@@ -63,7 +71,7 @@ public class MovementState :
     }
 
     public void SetStateContext(PlayerStateContext context) => m_myContext = context;
-    public int GetExitPriority() => 0;
+    public PlayerStateMachine.State GetStateEnum() => STATE_ENUM;
     public void Enter() { Debug.Log("Entered Movement."); }
     public void Exit() { Debug.Log("Exited Movement."); }
 

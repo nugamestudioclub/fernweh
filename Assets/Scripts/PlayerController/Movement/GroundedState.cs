@@ -2,9 +2,7 @@ using UnityEngine;
 
 public class GroundedState : AMovementSubState
 {
-    private const int STATE_PRIORITY = 0;
-
-    public GroundedState() : base(STATE_PRIORITY) { }
+    public GroundedState() : base(MovementState.State.Grounded) { }
 
     public override bool TryCheckForExits(out MovementState.State state_name)
     {

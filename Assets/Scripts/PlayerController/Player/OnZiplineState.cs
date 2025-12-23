@@ -3,6 +3,7 @@ using UnityEngine;
 public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.State>
 {
     private const int STEP_COUNT = 10;
+    private const PlayerStateMachine.State STATE_ENUM = PlayerStateMachine.State.OnZipline;
 
     private PlayerStateContext m_myContext;
     private MovementStateContext m_mContextCache; // cached to code golf and to read it easier
@@ -14,6 +15,12 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
 
     public bool TryCheckForExits(out PlayerStateMachine.State state_enum)
     {
+        if (m_myContext.IsPlayerLocked)
+        {
+            state_enum = PlayerStateMachine.State.Idle;
+            return true;
+        }
+
         if (!m_myContext.IsOnZipline)
         {
             state_enum = PlayerStateMachine.State.Movement;
@@ -67,10 +74,10 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
     {
         float dot = Vector3.Dot(perspective_dir, current_line_dir);
 
-        if (dot < 0.05f && dot > 0f) dot = 0f; // if just above 0, make it 0
-        if (dot > -0.05f && dot < 0f) dot = 0f; // if just below 0, make it 0
-        if (dot > 0.95f) dot = 1f; // if just under 1, make it 1
-        if (dot < -0.95f) dot = -1f; // if just above 1, make it -1
+        if (dot < 0.1f && dot > 0f) dot = 0f; // if just above 0, make it 0
+        if (dot > -0.1f && dot < 0f) dot = 0f; // if just below 0, make it 0
+        if (dot > 0.9f) dot = 1f; // if just under 1, make it 1
+        if (dot < -0.9f) dot = -1f; // if just above 1, make it -1
 
         return dot * current_line_dir;
     }
@@ -91,9 +98,27 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
     }
 
     #region
-    public void Enter() 
+    public void Enter()
     {
         m_mContextCache = m_myContext.SubmachineStateContext;
+
+        // if our hit point was consumed without reapplication, that means we entered this state
+        // without hitting a ZiplineObject, meaning we don't need to do this snapping behavior.
+        // E.G. Idle -> Zipline.
+        if (m_myContext.HitPoint == Vector3.zero)
+        {
+            m_step = STEP_COUNT;
+            return;
+        }
+
+        // begin delta snaapping for player so that the anchor is on the line
+        var delta = m_myContext.HitPoint - m_myContext.LineRiderAnchorTransform.position;
+
+        // mark the hit point as consumed so the above logic holds
+        m_myContext.HitPoint = Vector3.zero;
+
+        m_step = 0;
+        m_deltaPerStep = delta / STEP_COUNT;
 
         // a small bit of code dupe, i suppose.
         var inputs = m_mContextCache.MovementInput.normalized;
@@ -105,11 +130,6 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
                 m_mContextCache.PointOfView.TransformDirection(inputs),
                 current_line.GetDirection()) // get the velo dir...
             * m_mContextCache.LateralVelocity.magnitude; // ... and rescale
-
-        // begin delta snaapping for player so that the anchor is on the line
-        var delta = m_myContext.HitPoint - m_myContext.LineRiderAnchorTransform.position;
-        m_step = 0;
-        m_deltaPerStep = delta / STEP_COUNT;
     }
 
     public void Exit() 
@@ -126,8 +146,7 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
         }
     }
 
-    public int GetExitPriority() => 0;
-
+    public PlayerStateMachine.State GetStateEnum() => STATE_ENUM;
     public void SetStateContext(PlayerStateContext context) => m_myContext = context;
     #endregion
 }

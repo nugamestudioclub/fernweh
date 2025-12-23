@@ -2,11 +2,9 @@ using UnityEngine;
 
 public class JumpRiseState : AMovementSubState
 {
-    private const int STATE_PRIORITY = 0;
-
     private float m_timeElapsed;
 
-    public JumpRiseState() : base(STATE_PRIORITY) { }
+    public JumpRiseState() : base(MovementState.State.JumpRise) { }
 
     public override bool TryCheckForExits(out MovementState.State state_enum)
     {

@@ -14,6 +14,8 @@ public class PlayerStateContext : MonoBehaviour, IStateContext
 
     [HideInInspector] public CharacterController CharacterController;
 
+    [HideInInspector] public bool IsPlayerLocked;
+
     private void Awake()
     {
         CharacterController = GetComponent<CharacterController>();

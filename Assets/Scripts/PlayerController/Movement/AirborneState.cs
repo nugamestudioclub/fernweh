@@ -2,9 +2,7 @@ using UnityEngine;
 
 public class AirborneState : AMovementSubState
 {
-    private const int STATE_PRIORITY = 0;
-
-    public AirborneState() : base(STATE_PRIORITY) { }
+    public AirborneState() : base(MovementState.State.Airborne) { }
 
     public override bool TryCheckForExits(out MovementState.State state_enum)
     {

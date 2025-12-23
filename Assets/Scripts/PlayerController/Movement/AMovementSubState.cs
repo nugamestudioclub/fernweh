@@ -4,7 +4,7 @@ public abstract class AMovementSubState : IState<MovementStateContext, MovementS
 {
     protected MovementStateContext p_context;
 
-    private readonly int m_priority;
+    private readonly MovementState.State p_enum;
 
     public abstract void StateUpdate();
 
@@ -14,9 +14,9 @@ public abstract class AMovementSubState : IState<MovementStateContext, MovementS
 
     public virtual void Exit() { }
 
-    public AMovementSubState(int priority) { m_priority = priority; }
+    public AMovementSubState(MovementState.State enum_state) => p_enum = enum_state;
 
-    public int GetExitPriority() => m_priority;
+    public MovementState.State GetStateEnum() => p_enum;
 
     public void SetStateContext(MovementStateContext context) => p_context = context;
 

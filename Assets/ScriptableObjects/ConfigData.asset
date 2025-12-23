@@ -97,3 +97,5 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   MaxPitchAngle: 80
+  CameraRadius: 0.25
+  DroneFlySpeed: 15

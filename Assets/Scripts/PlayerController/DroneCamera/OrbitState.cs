@@ -1,41 +1,31 @@
 using UnityEngine;
 
-public class OrbitState : IState<DroneStateContext, DroneStateMachine.State>
+public class OrbitState : ADroneState
 {
-    private DroneStateContext m_context;
+    public OrbitState() : base(DroneStateMachine.State.Orbit) { }
 
-    private float m_pitch; // needed bc the pass-by 0 makes eulers awkward
-
-    public void StateUpdate()
+    public override void StateUpdate()
     {
-        float yaw =
-            m_context.TargetCameraTransform.eulerAngles.y
-            + m_context.RotationInput.x 
-            * m_context.ConfigData.OrbitRotationSensitivity 
-            * Time.deltaTime;
-
-        m_pitch = 
-            m_pitch 
-            + m_context.RotationInput.y 
-            * m_context.ConfigData.OrbitRotationSensitivity 
-            * Time.deltaTime;
-
-        m_pitch = Mathf.Clamp(m_pitch, -m_context.ConfigData.MaxPitchAngle, m_context.ConfigData.MaxPitchAngle);
+        (float yaw, float pitch) = CalculateRotationFromInput();
 
         // 
-        var collision_dir = Quaternion.Euler(m_pitch, yaw, 0f) * Vector3.forward;
+        var collision_dir = Quaternion.Euler(pitch, yaw, 0f) * Vector3.forward;
 
+        // shoot a ray from the focus target to where the camera should be. If we hit something,
+        // move our target position to just in front of it. This prevents camera clipping.
         float distance_to_focus;
-        float ray_max_distance = m_context.ConfigData.OrbitDistance;
-        var ray_origin = m_context.FocusTransform.position;
-        if (Physics.Raycast(
-            ray_origin, 
+        float ray_max_distance = p_context.ConfigData.OrbitDistance;
+        var ray_origin = p_context.FocusTransform.position;
+        if (Physics.SphereCast(
+            ray_origin,
+            p_context.ConfigData.CameraRadius,
             collision_dir, 
             out var hit,
             ray_max_distance,
-            m_context.ConfigData.OrbitCollisionMask))
+            p_context.ConfigData.OrbitCollisionMask))
         {
-            distance_to_focus = hit.distance;
+            // reduce the distance by the camera radius so we dont clip into it much
+            distance_to_focus = hit.distance - p_context.ConfigData.CameraRadius;
         }
         else
         {
@@ -44,32 +34,59 @@ public class OrbitState : IState<DroneStateContext, DroneStateMachine.State>
 
         Debug.DrawRay(ray_origin, collision_dir *  distance_to_focus, Color.red);
 
-        m_context.TargetCameraTransform.SetPositionAndRotation(
+        // update target's pos and rot so we can lerp to it
+        p_context.TargetCameraTransform.SetPositionAndRotation(
             ray_origin + collision_dir * distance_to_focus,
-            Quaternion.Euler(m_pitch, yaw, 0f));
+            Quaternion.Euler(pitch, yaw, 0f));
         
-        m_context.CameraTransform.SetPositionAndRotation(
+        // perform the lerps to the targeted transform
+        p_context.CameraTransform.SetPositionAndRotation(
             Vector3.Lerp(
-                m_context.CameraTransform.position,
-                m_context.TargetCameraTransform.position,
+                p_context.CameraTransform.position,
+                p_context.TargetCameraTransform.position,
                 10f * Time.deltaTime), 
             Quaternion.Lerp(
-                m_context.CameraTransform.rotation,
-                Quaternion.Euler(-m_pitch, yaw + 180, 0f),
+                p_context.CameraTransform.rotation,
+                Quaternion.Euler(-pitch, yaw + 180, 0f),
                 10f * Time.deltaTime));
-        //m_context.CameraTransform.forward *= -1;
     }
 
-    public bool TryCheckForExits(out DroneStateMachine.State state_enum)
+    public override void Enter()
     {
+        // when entering back into this state, since pitch is inverted and yaw is offset by 180
+        // when used to move the camera to its target rotation, flip the incoming values so that
+        // we get a smooth transition into this state without snapping the camera to a different rot
+        FlipCorrect();
+    }
+
+    public override void Exit()
+    {
+        // when exiting out of this state, since pitch is inverted and yaw is offset by 180 when
+        // used to move the camera to its target rotation, flip the outgoing values so that
+        // we get a smooth transition out of this state without snapping the camera to a different rot
+        FlipCorrect();
+    }
+
+    // symmetrical modifications made to the eulers, so we dont need two different modification methods
+    // for Enter and Exit
+    private void FlipCorrect()
+    {
+        var eulers = p_context.TargetCameraTransform.eulerAngles;
+        eulers.y -= 180;
+        eulers.x *= -1;
+
+        p_context.TargetCameraTransform.eulerAngles = eulers;
+    }
+
+    public override bool TryCheckForExits(out DroneStateMachine.State state_enum)
+    {
+        if (p_context.ToggleDroneState)
+        {
+            state_enum = DroneStateMachine.State.Drone;
+            return true;
+        }
+
         state_enum = default;
         return false;
     }
-
-    #region Boilerplate
-    public void Enter() { }
-    public void Exit() { }
-    public int GetExitPriority() => 0;
-    public void SetStateContext(DroneStateContext context) => m_context = context;
-    #endregion
 }
