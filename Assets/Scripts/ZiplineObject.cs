@@ -47,7 +47,7 @@ public class ZiplineObject : MonoBehaviour
 
         m_doScanForRider = true;
 
-        //GizmoDebug.Instance.DrawSphereRay(m_startPosition, m_endPosition, 0.5f, Color.red);
+        GizmoDebug.Instance.DrawSphereRay(m_startPosition, m_endPosition, 0.1f, Color.red);
     }
 
     private void Update()

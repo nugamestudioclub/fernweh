@@ -45,6 +45,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb089f8c0d8e99f4d86475863add8232, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onLineLeeway: 1
+  m_lockoutDuration: 2
+  m_startPosition: {x: 23.25, y: 5.3, z: -4.52}
+  m_endPosition: {x: 23.62, y: 2.57, z: -25.7}
+  m_riderLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!120 &661309835665552771
 LineRenderer:
   serializedVersion: 2

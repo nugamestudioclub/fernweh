@@ -26,7 +26,7 @@ public class PlayerStateContext : MonoBehaviour, IStateContext
         // don't fully update the substate context because we don't care about most of it.
         SubmachineStateContext.UpdateInputs();
 
-        if (SubmachineStateContext.IsJumpDown && IsOnZipline)
+        if (SubmachineStateContext.WasJumpPressedThisFrame && IsOnZipline)
         {
             MountedLine.Dismount();
 
@@ -35,6 +35,7 @@ public class PlayerStateContext : MonoBehaviour, IStateContext
         }
     }
 
+    // pull into interface method?
     public void MountLine(ZiplineObject line, Vector3 hit_point)
     {
         IsOnZipline = true;

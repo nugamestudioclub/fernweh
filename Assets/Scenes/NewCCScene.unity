@@ -942,34 +942,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: ZiplineObject
       objectReference: {fileID: 0}
-    - target: {fileID: 1286719503114083349, guid: d50c20817d4961a4f9330a86835daaf4, type: 3}
-      propertyPath: m_endPosition.x
-      value: 23.62
-      objectReference: {fileID: 0}
-    - target: {fileID: 1286719503114083349, guid: d50c20817d4961a4f9330a86835daaf4, type: 3}
-      propertyPath: m_endPosition.y
-      value: 2.57
-      objectReference: {fileID: 0}
-    - target: {fileID: 1286719503114083349, guid: d50c20817d4961a4f9330a86835daaf4, type: 3}
-      propertyPath: m_endPosition.z
-      value: -25.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 1286719503114083349, guid: d50c20817d4961a4f9330a86835daaf4, type: 3}
-      propertyPath: m_startPosition.x
-      value: 23.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 1286719503114083349, guid: d50c20817d4961a4f9330a86835daaf4, type: 3}
-      propertyPath: m_startPosition.y
-      value: 5.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 1286719503114083349, guid: d50c20817d4961a4f9330a86835daaf4, type: 3}
-      propertyPath: m_startPosition.z
-      value: -4.52
-      objectReference: {fileID: 0}
-    - target: {fileID: 1286719503114083349, guid: d50c20817d4961a4f9330a86835daaf4, type: 3}
-      propertyPath: m_riderLayer.m_Bits
-      value: 64
-      objectReference: {fileID: 0}
     - target: {fileID: 7633662791191283153, guid: d50c20817d4961a4f9330a86835daaf4, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.63
@@ -1219,6 +1191,7 @@ MonoBehaviour:
   AirState: 0
   MovementInput: {x: 0, y: 0}
   IsJumpDown: 0
+  WasJumpPressedThisFrame: 0
   LateralVelocity: {x: 0, y: 0, z: 0}
   AdditiveYVelocity: 0
   CanEnterCoyoteState: 0
@@ -7248,7 +7221,7 @@ Transform:
   m_GameObject: {fileID: 1672286884}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 0.94, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7273,7 +7246,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 1
+  m_Radius: 0.58
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1709944552
 GameObject:

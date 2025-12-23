@@ -13,6 +13,7 @@ public class MovementStateContext : MonoBehaviour, IStateContext
 
     [HideInInspector] public Vector2 MovementInput;
     [HideInInspector] public bool IsJumpDown;
+    [HideInInspector] public bool WasJumpPressedThisFrame;
     [HideInInspector] public TemporaryBoolean HasQueuedJumpAction; // have we input a jump action recently?
 
     // Not really "lateral" velocity, but moreso the velocity on the plane defined by the surface we
@@ -81,6 +82,7 @@ public class MovementStateContext : MonoBehaviour, IStateContext
     {
         MovementInput = m_movementAction.ReadValue<Vector2>();
         IsJumpDown = m_jumpAction.IsPressed();
+        WasJumpPressedThisFrame = m_jumpAction.WasPerformedThisFrame();
     }
 
     public void UpdateContext()

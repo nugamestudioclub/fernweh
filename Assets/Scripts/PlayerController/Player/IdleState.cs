@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class IdleState : IState<PlayerStateContext, PlayerStateMachine.State>
 {
     private const PlayerStateMachine.State STATE_ENUM = PlayerStateMachine.State.Idle;
@@ -22,6 +24,14 @@ public class IdleState : IState<PlayerStateContext, PlayerStateMachine.State>
     public void StateUpdate()
     {
         // pass, ignore all
+        // ...EXCEPT for gravity. If needed.
+
+        if (m_context.SubmachineStateContext.AirState == AirState.Grounded) return;
+
+        m_context.SubmachineStateContext.AdditiveYVelocity = 
+            Mathf.Max(
+                m_context.SubmachineStateContext.AdditiveYVelocity + Physics.gravity.y * Time.deltaTime, 
+                -m_context.SubmachineStateContext.ConfigData.MaxFallSpeed);
     }
 
     public bool TryCheckForExits(out PlayerStateMachine.State state_enum)
