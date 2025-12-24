@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 public class ZiplineShootBehavior : MonoBehaviour
 {
     [SerializeField] private Transform m_referencePOV;
+    [SerializeField] private Transform m_lineOriginTransform;
     [SerializeField] private SpriteRenderer m_reticle;
 
     [Space]
@@ -63,7 +64,7 @@ public class ZiplineShootBehavior : MonoBehaviour
 
         var instance = GameObject.Instantiate(m_ziplineObjectPrefab);
 
-        instance.SetAnchors(m_referencePOV.position + m_referencePOV.forward, m_referencePOV.forward * m_targetDistance + m_referencePOV.position);
+        instance.SetAnchors(m_lineOriginTransform.position + m_referencePOV.forward, m_referencePOV.forward * m_targetDistance + m_referencePOV.position);
 
         m_activeLines.Add(instance);
     }

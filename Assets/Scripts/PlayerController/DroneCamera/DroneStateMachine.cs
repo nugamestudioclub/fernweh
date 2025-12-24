@@ -1,7 +1,7 @@
 public class DroneStateMachine : 
     AStateMachine<
         DroneStateContext, 
-        IState<DroneStateContext, DroneStateMachine.State>, 
+        ADroneState, 
         DroneStateMachine.State>
 {
     public enum State
@@ -11,7 +11,7 @@ public class DroneStateMachine :
         Drone
     }
 
-    public override IState<DroneStateContext, State> FactoryProduceState(State state_enum)
+    public override ADroneState FactoryProduceState(State state_enum)
     {
         return state_enum switch
         {

@@ -28,7 +28,7 @@ public class PlayerDriver : MonoBehaviour
 
         // start machines
         m_playerStateMachine.ChangeState(m_playerStateMachine.FactoryProduceState(PlayerStateMachine.State.Movement));
-        m_droneStateMachine.ChangeState(m_droneStateMachine.FactoryProduceState(DroneStateMachine.State.Drone));
+        m_droneStateMachine.ChangeState(m_droneStateMachine.FactoryProduceState(DroneStateMachine.State.Orbit));
     }
 
     private void Update()
@@ -39,9 +39,7 @@ public class PlayerDriver : MonoBehaviour
 
     // a bit hacky for now, but this is generally how this sort of thing should go.
     // this might be better placed in the PlayerStateMachine (how to hook that up, ill think on it)
-    private void CheckIfShouldIdle(
-        IState<DroneStateContext, DroneStateMachine.State> _, 
-        IState<DroneStateContext, DroneStateMachine.State> to)
+    private void CheckIfShouldIdle(ADroneState _, ADroneState to)
     {
         if (to.GetStateEnum() == DroneStateMachine.State.Drone)
         {
@@ -52,9 +50,7 @@ public class PlayerDriver : MonoBehaviour
             m_playerStateContext.IsPlayerLocked = false;
         }
     }
-    private void CheckIfShootState(
-        IState<DroneStateContext, DroneStateMachine.State> _,
-        IState<DroneStateContext, DroneStateMachine.State> to)
+    private void CheckIfShootState(ADroneState _, ADroneState to)
     {
         if (to.GetStateEnum() == DroneStateMachine.State.Aim)
         {
