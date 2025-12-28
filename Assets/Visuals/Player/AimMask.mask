@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: AimMask
+  m_Mask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: Armature
+    m_Weight: 0
+  - m_Path: Armature/AIK.L
+    m_Weight: 0
+  - m_Path: Armature/AIK.R
+    m_Weight: 0
+  - m_Path: Armature/APTarget.L
+    m_Weight: 0
+  - m_Path: Armature/APTarget.R
+    m_Weight: 0
+  - m_Path: Armature/LIK.L
+    m_Weight: 0
+  - m_Path: Armature/LIK.R
+    m_Weight: 0
+  - m_Path: Armature/LPTarget.L
+    m_Weight: 0
+  - m_Path: Armature/LPTarget.R
+    m_Weight: 0
+  - m_Path: Armature/Root
+    m_Weight: 0
+  - m_Path: Armature/Root/Torso
+    m_Weight: 0
+  - m_Path: Armature/Root/Torso/Collar.L
+    m_Weight: 1
+  - m_Path: Armature/Root/Torso/Collar.L/UArm.L
+    m_Weight: 1
+  - m_Path: Armature/Root/Torso/Collar.L/UArm.L/LArm.L
+    m_Weight: 1
+  - m_Path: Armature/Root/Torso/Collar.R
+    m_Weight: 1
+  - m_Path: Armature/Root/Torso/Collar.R/UArm.R
+    m_Weight: 1
+  - m_Path: Armature/Root/Torso/Collar.R/UArm.R/LArm.R
+    m_Weight: 1
+  - m_Path: Armature/Root/Torso/Hip.L
+    m_Weight: 0
+  - m_Path: Armature/Root/Torso/Hip.L/ULeg.L
+    m_Weight: 0
+  - m_Path: Armature/Root/Torso/Hip.L/ULeg.L/LLeg.L
+    m_Weight: 0
+  - m_Path: Armature/Root/Torso/Hip.R
+    m_Weight: 0
+  - m_Path: Armature/Root/Torso/Hip.R/ULeg.R
+    m_Weight: 0
+  - m_Path: Armature/Root/Torso/Hip.R/ULeg.R/LLeg.R
+    m_Weight: 0
+  - m_Path: Armature/Root/Torso/Neck
+    m_Weight: 0
+  - m_Path: Armature/Root/Torso/Neck/Head
+    m_Weight: 0
+  - m_Path: Eyes
+    m_Weight: 0
+  - m_Path: Head
+    m_Weight: 0
+  - m_Path: LArm
+    m_Weight: 0
+  - m_Path: LLeg
+    m_Weight: 0
+  - m_Path: Shoulder
+    m_Weight: 0
+  - m_Path: Torso
+    m_Weight: 0
+  - m_Path: UArm
+    m_Weight: 0
+  - m_Path: ULeg
+    m_Weight: 0
