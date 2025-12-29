@@ -5,23 +5,40 @@ public class PlayerDriver : MonoBehaviour
     [SerializeField] private PlayerStateContext m_playerStateContext;
     [SerializeField] private MovementStateContext m_movementStateContext;
     [SerializeField] private DroneStateContext m_droneStateContext;
+
+    [Space]
+
     [SerializeField] private ZiplineShootBehavior m_shootBehavior;
+    [SerializeField] private PlayerAnimationManager m_animationManager;
 
     private PlayerStateMachine m_playerStateMachine;
     private DroneStateMachine m_droneStateMachine;
 
     private void Awake()
     {
-        // setup machines
-        m_playerStateMachine = new PlayerStateMachine(m_movementStateContext);
+        // setup machines ----
+
+        // create player machine with animation manager's MovementStateChange listener passed as a func
+        // to subscribe whenever MovementState comes around
+        m_playerStateMachine = 
+            new PlayerStateMachine(
+                m_movementStateContext,
+                new MovementState.StateChanged[] { m_animationManager.OnMovementStateChange });
+
         m_playerStateMachine.SetContext(m_playerStateContext);
 
+        // subscriptions for animation
+        m_playerStateMachine.OnStateChanged += m_animationManager.OnPlayerStateChange;
+
+        // creating drone state machine and locking cursor
         m_droneStateMachine = new DroneStateMachine();
+        Cursor.lockState = CursorLockMode.Locked;
         m_droneStateMachine.SetContext(m_droneStateContext);
 
-        Cursor.lockState = CursorLockMode.Locked;
+        // subscriptions for state changes for camera; the main way to tell when entering Aim state
         m_droneStateMachine.OnStateChanged += CheckIfShouldIdle;
         m_droneStateMachine.OnStateChanged += CheckIfShootState;
+        m_droneStateMachine.OnStateChanged += m_animationManager.CheckAimState;
 
         // ensure we dont start in shooting state
         m_shootBehavior.gameObject.SetActive(false);
@@ -31,6 +48,17 @@ public class PlayerDriver : MonoBehaviour
         m_droneStateMachine.ChangeState(m_droneStateMachine.FactoryProduceState(DroneStateMachine.State.Orbit));
     }
 
+    // Desub when destroyed. Unlikely to happen, but just in case.
+    private void OnDestroy()
+    {
+        m_playerStateMachine.OnStateChanged -= m_animationManager.OnPlayerStateChange;
+
+        m_droneStateMachine.OnStateChanged -= CheckIfShouldIdle;
+        m_droneStateMachine.OnStateChanged -= CheckIfShootState;
+        m_droneStateMachine.OnStateChanged -= m_animationManager.CheckAimState;
+    }
+
+    // on update cycle, update the machines
     private void Update()
     {
         m_playerStateMachine.MachineUpdate();
@@ -50,6 +78,9 @@ public class PlayerDriver : MonoBehaviour
             m_playerStateContext.IsPlayerLocked = false;
         }
     }
+
+    // if we're in the aim state, activate our shooting behavior script to go along with it.
+    // disable it if we're not, tho.
     private void CheckIfShootState(ADroneState _, ADroneState to)
     {
         if (to.GetStateEnum() == DroneStateMachine.State.Aim)

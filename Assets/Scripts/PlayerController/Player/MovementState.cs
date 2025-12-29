@@ -47,7 +47,7 @@ public class MovementState :
     {
         if (m_myContext.IsPlayerLocked)
         {
-            state_enum = PlayerStateMachine.State.Idle;
+            state_enum = PlayerStateMachine.State.Locked;
             return true;
         }
 

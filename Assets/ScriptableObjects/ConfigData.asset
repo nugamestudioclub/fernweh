@@ -39,7 +39,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  JumpForce: 15
+  JumpForce: 8
   SpherecastOriginTransformTag: CastOrigin
   GroundSpherecastDistance: 0.65
   GroundSpherecastRadius: 0.5
@@ -51,8 +51,8 @@ MonoBehaviour:
   StickyRaycastMask:
     serializedVersion: 2
     m_Bits: 1
-  MaxGroundVelocityMagnitude: 10
-  Acceleration: 60
+  MaxGroundVelocityMagnitude: 5
+  Acceleration: 45
   StickyForceScalar: 5
   UseDeltaAccelerationModifier: 1
   NormalizedDeltaAccelerationCurve:
@@ -89,10 +89,10 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   DeltaAccelerationMagnitude: 100
-  MaxDriveVelocityMagnitude: 40
-  DriveAcceleration: 20
+  MaxDriveVelocityMagnitude: 30
+  DriveAcceleration: 25
   OrbitRotationSensitivity: 3
-  OrbitDistance: 8.5
+  OrbitDistance: 5.5
   OrbitCollisionMask:
     serializedVersion: 2
     m_Bits: 1

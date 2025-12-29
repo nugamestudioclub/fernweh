@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-public class FootRigTest : MonoBehaviour
+public class SimpleFootIKRigBehavior : MonoBehaviour
 {
     [SerializeField] private TwoBoneIKConstraint m_constraint;
     [SerializeField] private Transform m_footRefConstraint;

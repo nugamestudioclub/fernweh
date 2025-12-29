@@ -17,7 +17,7 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
     {
         if (m_myContext.IsPlayerLocked)
         {
-            state_enum = PlayerStateMachine.State.Idle;
+            state_enum = PlayerStateMachine.State.Locked;
             return true;
         }
 
@@ -104,7 +104,7 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
 
         // if our hit point was consumed without reapplication, that means we entered this state
         // without hitting a ZiplineObject, meaning we don't need to do this snapping behavior.
-        // E.G. Idle -> Zipline.
+        // E.G. Locked -> Zipline.
         if (m_myContext.HitPoint == Vector3.zero)
         {
             m_step = STEP_COUNT;

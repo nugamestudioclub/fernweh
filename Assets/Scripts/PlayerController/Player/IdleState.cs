@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class IdleState : IState<PlayerStateContext, PlayerStateMachine.State>
 {
-    private const PlayerStateMachine.State STATE_ENUM = PlayerStateMachine.State.Idle;
+    private const PlayerStateMachine.State STATE_ENUM = PlayerStateMachine.State.Locked;
 
     private PlayerStateContext m_context;
 

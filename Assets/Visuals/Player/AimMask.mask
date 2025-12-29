@@ -40,11 +40,11 @@ AvatarMask:
   - m_Path: Armature/Root/Torso/Collar.L/UArm.L/LArm.L
     m_Weight: 1
   - m_Path: Armature/Root/Torso/Collar.R
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Armature/Root/Torso/Collar.R/UArm.R
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Armature/Root/Torso/Collar.R/UArm.R/LArm.R
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Armature/Root/Torso/Hip.L
     m_Weight: 0
   - m_Path: Armature/Root/Torso/Hip.L/ULeg.L
