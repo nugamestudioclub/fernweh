@@ -10,7 +10,7 @@ public class ZiplineRiderController : MonoBehaviour
     private CharacterController m_characterController;
     private BodyController m_bodyController;
 
-    private ZiplineObject m_currentLine;
+    private ZiplineObject_OLD m_currentLine;
     private Transform m_perspective;
 
     private Vector3 m_currentLineVelocity;
@@ -24,7 +24,7 @@ public class ZiplineRiderController : MonoBehaviour
         m_perspective = Camera.main.transform;
     }
 
-    public void RideLine(ZiplineObject obj, float distance_from_start)
+    public void RideLine(ZiplineObject_OLD obj, float distance_from_start)
     {
         m_currentLine = obj;
         m_bodyController.ResetAttributes();

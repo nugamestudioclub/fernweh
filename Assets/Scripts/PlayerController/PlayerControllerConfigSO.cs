@@ -27,6 +27,8 @@ public class PlayerControllerConfigSO : ScriptableObject
 
     [Space]
     [Header("Movement")]
+    public float MaxInclineAngle;
+    public float SlopeSlideForceScalar;
     public float MaxGroundVelocityMagnitude;
     public float Acceleration;
     [Tooltip("The force to be applied per unit distance when stickiness to ground surface take effect. A positive value.")] 
@@ -41,6 +43,14 @@ public class PlayerControllerConfigSO : ScriptableObject
     [Header("Zipline")]
     public float MaxDriveVelocityMagnitude;
     public float DriveAcceleration;
+
+    [Space]
+
+    public int MaxPlayerAnchorCount;
+    public float MaxAnchorPlaceDistance;
+    public float PlayerAnchorAttachmentRadius;
+    public LayerMask AnchorPlacementMask;
+    public ZiplineAnchor AnchorPrefab;
 
     [Space]
     [Header("Camera and Drone")]

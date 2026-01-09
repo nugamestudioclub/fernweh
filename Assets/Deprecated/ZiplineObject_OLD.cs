@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ZiplineObject : MonoBehaviour
+public class ZiplineObject_OLD : MonoBehaviour
 {
     [SerializeField] private float m_onLineLeeway = 1f;
     [SerializeField] private float m_lockoutDuration = 2f;
@@ -60,7 +60,7 @@ public class ZiplineObject : MonoBehaviour
         {
             m_hasRider = true;
 
-            player_context.MountLine(this, hit.point);
+            //player_context.MountLine(this, hit.point);
 
             //component.enabled = true;
             //component.RideLine(this, hit.distance);

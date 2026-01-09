@@ -38,6 +38,9 @@ public class PlayerStateContext : MonoBehaviour, IStateContext
     // pull into interface method?
     public void MountLine(ZiplineObject line, Vector3 hit_point)
     {
+        // allows for zipline-zipline transfer
+        if (MountedLine != null) MountedLine.Dismount();
+
         IsOnZipline = true;
         MountedLine = line;
 

@@ -3,6 +3,10 @@ using UnityEngine.Animations.Rigging;
 
 public class PlayerAnimationManager : MonoBehaviour
 {
+    [SerializeField] private Transform m_facingDirTransform;
+
+    [Space]
+
     [SerializeField] private Animator m_animator;
     [SerializeField] private RigBuilder m_rigs;
     [SerializeField] private int m_footIKRigLayerIndex;
@@ -25,6 +29,9 @@ public class PlayerAnimationManager : MonoBehaviour
     // prevents needless spherecasts
     [SerializeField] private MonoBehaviour[] m_feetIKsToToggle;
     [SerializeField] private MovementStateContext m_movementContext; // to source velocity
+
+    private Vector3 m_previousTargetForward;
+    private bool m_isLocked;
 
     private enum AnimatorState
     {
@@ -55,18 +62,20 @@ public class PlayerAnimationManager : MonoBehaviour
     {
         var velocity = m_movementContext.LateralVelocity;
 
+        m_previousTargetForward = m_facingDirTransform.forward;
+
         // orient body direction
-        var target_forward = transform.forward;
+        var target_forward = m_facingDirTransform.forward;
         switch (m_orientMode)
         {
             case OrientState.ReticleDirection:
-                target_forward = m_reticleTarget.position - m_movementContext.PointOfView.position;
+                target_forward = m_reticleTarget.position - m_headBone.position;
                 break;
 
             case OrientState.MoveDirection:
                 // if look vector is pretty close to 0 (or is 0), skip
                 if (velocity.magnitude < 0.05f) break;
-                target_forward = velocity;
+                target_forward = velocity.normalized;
                 break;
 
             default: // None = pass orientation step
@@ -74,16 +83,22 @@ public class PlayerAnimationManager : MonoBehaviour
         }
 
         m_lookTarget.position =
-            Vector3.Lerp(
+            Vector3.Slerp(
                 m_lookTarget.position, 
                 m_headBone.position + m_lookTargetDistance * target_forward, 
-                15f*Time.deltaTime);
+                5f*Time.deltaTime);
 
         var flattened_forward = new Vector3(target_forward.x, 0f, target_forward.z);
-        transform.forward = Vector3.Lerp(transform.forward, flattened_forward.normalized, 10f * Time.deltaTime);
-
+        m_facingDirTransform.forward = Vector3.Lerp(m_facingDirTransform.forward, flattened_forward.normalized, 10f * Time.deltaTime);
+        
         // transform velocity to pass it to animator correctly
-        var norm_velo = transform.InverseTransformVector(velocity).normalized;
+        var norm_velo = m_facingDirTransform.InverseTransformVector(velocity).normalized;
+
+        if (m_isLocked)
+        {
+            m_xVel = 0f;
+        }
+
         m_xVel = Mathf.Lerp(m_xVel, norm_velo.x, 10f * Time.deltaTime);
         m_yVel = Mathf.Lerp(m_yVel, norm_velo.z, 10f * Time.deltaTime);
         m_animator.SetFloat(m_moveXHash, m_xVel);
@@ -93,10 +108,12 @@ public class PlayerAnimationManager : MonoBehaviour
     }
 
     public void OnPlayerStateChange(
-        IState<PlayerStateContext, PlayerStateMachine.State> _,
+        IState<PlayerStateContext, PlayerStateMachine.State> from,
         IState<PlayerStateContext, PlayerStateMachine.State> to)
     {
         Debug.Log(to.GetStateEnum());
+        m_isLocked = false;
+
         switch (to.GetStateEnum())
         {
             case PlayerStateMachine.State.OnZipline:
@@ -111,13 +128,19 @@ public class PlayerAnimationManager : MonoBehaviour
                 SetFootIKState(true);
                 SetOrientMode(OrientState.None);
                 SetStateParameter(AnimatorState.MovementTree);
+                m_isLocked = true;
                 break;
 
             case PlayerStateMachine.State.Movement:
+                // if we're exiting from Zipline, only state for that are the airborne ones (since that's how you get off a zipline)
+                var target_state =
+                    from != null && from.GetStateEnum() == PlayerStateMachine.State.OnZipline ?
+                        (m_yVel > 0 ? AnimatorState.JumpRise : AnimatorState.Airborne) : AnimatorState.MovementTree;
+
                 // enable foot IK Rig and Foot IK Scripts
                 SetFootIKState(true);
                 SetOrientMode(OrientState.MoveDirection);
-                SetStateParameter(AnimatorState.MovementTree);
+                SetStateParameter(target_state);
                 break;
 
             default:
@@ -175,7 +198,10 @@ public class PlayerAnimationManager : MonoBehaviour
         foreach (var item in m_feetIKsToToggle) { item.enabled = state; }
     }
 
-    private void SetStateParameter(AnimatorState state) => m_animator.SetInteger(m_state, (int)state);
+    private void SetStateParameter(AnimatorState state)
+    {
+        m_animator.SetInteger(m_state, (int)state);
+    }
 
     private void SetOrientMode(OrientState state) => m_orientMode = state;
 }

@@ -23,6 +23,11 @@ public class ConfigCastViewer : MonoBehaviour
         DrawGizmos();
     }
 
+    private void Awake()
+    {
+        GetTransforms();
+    }
+
     private void DrawGizmos()
     {
         try
