@@ -8,7 +8,7 @@ public class DroneFlightState : ADroneState
     public override void StateUpdate()
     {
         var inputs = p_context.MovementInput;
-        (float yaw, float pitch) = CalculateRotationFromInput();
+        (float yaw, float pitch) = CalculateUnscaledRotationFromInput();
 
         var direction = p_context.CameraTransform.TransformDirection(new Vector3(inputs.x, 0f, inputs.y));
 

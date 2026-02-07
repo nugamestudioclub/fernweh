@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,10 +9,10 @@ public class MovementStateContext : MonoBehaviour, IStateContext
 
     // ---------------- public read-write ----------------
     // TODO: Separate this into public read, and public read-write? Not all of these need to be mutated outside this class.
-    public AirState AirState;
+    /*[HideInInspector] DEBUG*/ public AirState AirState;
 
     [HideInInspector] public Vector2 MovementInput;
-    public bool IsOnSlipSlope; // if we're on a too-intense incline and need to slide against it
+    /*[HideInInspector] DEBUG*/ public bool IsOnSlipSlope; // if we're on a too-intense incline and need to slide against it
     [HideInInspector] public bool IsJumpDown;
     [HideInInspector] public bool WasJumpPressedThisFrame;
     [HideInInspector] public TemporaryBoolean HasQueuedJumpAction; // have we input a jump action recently?
@@ -126,6 +125,13 @@ public class MovementStateContext : MonoBehaviour, IStateContext
             grounded_this_frame = false;
             IsOnSlipSlope = true;
             SurfaceNormal = hit.normal;
+
+            // DEBUG
+            Debug.DrawRay(transform.position, SurfaceNormal * 3f, Color.green);
+            var surf_right = Vector3.Cross(Vector3.up, SurfaceNormal);
+            Debug.DrawRay(transform.position, surf_right * 3f, Color.blue);
+            var surf_forward = Vector3.Cross(SurfaceNormal, surf_right);
+            Debug.DrawRay(transform.position, surf_forward * 3f, Color.red);
         }
 
         // are we okay to check if grounded and we ARE grounded?

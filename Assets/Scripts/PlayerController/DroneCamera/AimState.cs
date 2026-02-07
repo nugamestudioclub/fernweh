@@ -11,7 +11,7 @@ public class AimState : ADroneState
         var start_pos = p_context.FocusTransform.position + p_context.ConfigData.AimPerchOffset;
         target_transform.position = start_pos;
 
-        (float yaw, float pitch) = CalculateRotationFromInput();
+        (float yaw, float pitch) = CalculateUnscaledRotationFromInput();
 
         target_transform.rotation = Quaternion.Euler(-pitch, 0f, 0f);
         target_transform.RotateAround(p_context.FocusTransform.position, Vector3.up, yaw);

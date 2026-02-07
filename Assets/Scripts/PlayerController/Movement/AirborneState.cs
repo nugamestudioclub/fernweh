@@ -38,7 +38,7 @@ public class AirborneState : AMovementSubState
 
     private float ComputeYVelo(float current_y_velo)
     {
-        return current_y_velo + Physics.gravity.y * Time.deltaTime;
+        return current_y_velo + p_context.ConfigData.Gravity * Time.deltaTime;
     }
 
     // if we're on a slippery slope, we wont see the vertical velocity since we're just stuck on it.
@@ -50,10 +50,16 @@ public class AirborneState : AMovementSubState
         var normal = p_context.SurfaceNormal;
         var velo = p_context.LateralVelocity;
 
-        // TODO: seems to be a bit jittery
-        velo.x += normal.x * p_context.ConfigData.SlopeSlideForceScalar * Mathf.Abs(p_context.AdditiveYVelocity) * Time.deltaTime;
-        velo.z += normal.z * p_context.ConfigData.SlopeSlideForceScalar * Mathf.Abs(p_context.AdditiveYVelocity) * Time.deltaTime;
+        var surf_right = Vector3.Cross(Vector3.up, normal);
+        var surf_forward = Vector3.Cross(normal, surf_right);
+        var surf_downslope = -surf_forward;
 
-        p_context.LateralVelocity = velo;
+        // TEST THIS: lateral velo is supposed to have no y component, but if it works we'll figure it out
+        p_context.LateralVelocity += 
+            Time.deltaTime * 
+            p_context.ConfigData.SlopeSlideForceScalar *
+            Mathf.Abs(p_context.AdditiveYVelocity) * 
+            Mathf.Cos(Vector3.Angle(surf_downslope, Vector3.down)) * 
+            surf_downslope;
     }
 }

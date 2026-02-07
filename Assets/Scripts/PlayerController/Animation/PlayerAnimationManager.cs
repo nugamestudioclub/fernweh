@@ -50,12 +50,12 @@ public class PlayerAnimationManager : MonoBehaviour
 
     private OrientState m_orientMode;
     private float m_xVel;
-    private float m_yVel;
+    private float m_zVel;
 
     // param hashes ----------
     private readonly int m_state = Animator.StringToHash("State");
     private readonly int m_moveXHash = Animator.StringToHash("Move_X");
-    private readonly int m_moveYHash = Animator.StringToHash("Move_Y");
+    private readonly int m_moveZHash = Animator.StringToHash("Move_Z");
     private readonly int m_aimTrigger = Animator.StringToHash("Trigger");
 
     private void LateUpdate()
@@ -94,17 +94,24 @@ public class PlayerAnimationManager : MonoBehaviour
         // transform velocity to pass it to animator correctly
         var norm_velo = m_facingDirTransform.InverseTransformVector(velocity).normalized;
 
+        // if locked, stop all velo so we dont walk in place
         if (m_isLocked)
         {
             m_xVel = 0f;
+            m_zVel = 0f;
+
+            m_animator.speed = 0f;
+        }
+        else
+        {
+            m_xVel = Mathf.Lerp(m_xVel, norm_velo.x, 10f * Time.deltaTime);
+            m_zVel = Mathf.Lerp(m_zVel, norm_velo.z, 10f * Time.deltaTime);
+
+            m_animator.speed = Mathf.Max(1f, velocity.magnitude / m_animSpeedPerVelo);
         }
 
-        m_xVel = Mathf.Lerp(m_xVel, norm_velo.x, 10f * Time.deltaTime);
-        m_yVel = Mathf.Lerp(m_yVel, norm_velo.z, 10f * Time.deltaTime);
         m_animator.SetFloat(m_moveXHash, m_xVel);
-        m_animator.SetFloat(m_moveYHash, m_yVel);
-
-        m_animator.speed = Mathf.Max(1f, velocity.magnitude / m_animSpeedPerVelo);
+        m_animator.SetFloat(m_moveZHash, m_zVel);
     }
 
     public void OnPlayerStateChange(
@@ -135,7 +142,7 @@ public class PlayerAnimationManager : MonoBehaviour
                 // if we're exiting from Zipline, only state for that are the airborne ones (since that's how you get off a zipline)
                 var target_state =
                     from != null && from.GetStateEnum() == PlayerStateMachine.State.OnZipline ?
-                        (m_yVel > 0 ? AnimatorState.JumpRise : AnimatorState.Airborne) : AnimatorState.MovementTree;
+                        (m_zVel > 0 ? AnimatorState.JumpRise : AnimatorState.Airborne) : AnimatorState.MovementTree;
 
                 // enable foot IK Rig and Foot IK Scripts
                 SetFootIKState(true);

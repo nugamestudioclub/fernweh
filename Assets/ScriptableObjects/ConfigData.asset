@@ -15,6 +15,7 @@ MonoBehaviour:
   JumpBufferDuration: 0.05
   CoyoteDuration: 0.05
   MaxFallSpeed: 25
+  Gravity: -9.8
   NormalizedJumpForceCurve:
     serializedVersion: 2
     m_Curve:
@@ -52,7 +53,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   MaxInclineAngle: 50
-  SlopeSlideForceScalar: 30
+  SlopeSlideForceScalar: 1
   MaxGroundVelocityMagnitude: 5
   Acceleration: 45
   StickyForceScalar: 5
@@ -100,7 +101,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   AnchorPrefab: {fileID: 4054406702906335122, guid: 30fa5c61e4b342446a6104374f109edd, type: 3}
-  OrbitRotationSensitivity: 5
+  OrbitRotationSensitivity: 0.125
   OrbitDistance: 5.5
   OrbitCollisionMask:
     serializedVersion: 2
