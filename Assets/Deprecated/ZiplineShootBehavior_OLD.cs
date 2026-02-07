@@ -16,16 +16,16 @@ public class ZiplineShootBehavior_OLD : MonoBehaviour
     [Space]
 
     [SerializeField] private int m_maxZiplineCount = 5;
-    [SerializeField] private ZiplineObject m_ziplineObjectPrefab;
+    [SerializeField] private ZiplineObject_OLD m_ziplineObjectPrefab;
 
-    private IList<ZiplineObject> m_activeLines;
+    private IList<ZiplineObject_OLD> m_activeLines;
     private float m_targetDistance;
 
     private InputAction m_fireZipline;
 
     private void Awake()
     {
-        m_activeLines = new List<ZiplineObject>();
+        m_activeLines = new List<ZiplineObject_OLD>();
         m_fireZipline = InputSystem.actions.FindAction("Attack");
     }
 

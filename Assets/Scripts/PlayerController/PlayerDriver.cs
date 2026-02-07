@@ -8,7 +8,7 @@ public class PlayerDriver : MonoBehaviour
 
     [Space]
 
-    [SerializeField] private ZiplineShootBehavior m_shootBehavior;
+    [SerializeField] private AnchorShootBehavior m_shootBehavior;
     [SerializeField] private PlayerAnimationManager m_animationManager;
 
     private PlayerStateMachine m_playerStateMachine;

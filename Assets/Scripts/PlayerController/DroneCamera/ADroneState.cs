@@ -11,18 +11,16 @@ public abstract class ADroneState : IState<DroneStateContext, DroneStateMachine.
 
     // Using the rotation input from the context, calculates the new yaw and pitch for the state.
     // Clamps the pitch between the max angle as specified in the Config Data as well.
-    protected (float yaw, float pitch) CalculateRotationFromInput()
+    protected (float yaw, float pitch) CalculateUnscaledRotationFromInput()
     {
         float yaw =
             p_context.TargetTransform.eulerAngles.y
             + p_context.RotationInput.x
-            * p_context.ConfigData.OrbitRotationSensitivity
-            * Time.deltaTime;
+            * p_context.ConfigData.OrbitRotationSensitivity;
 
         p_pitch +=
             p_context.RotationInput.y
-            * p_context.ConfigData.OrbitRotationSensitivity
-            * Time.deltaTime;
+            * p_context.ConfigData.OrbitRotationSensitivity;
 
         p_pitch = Mathf.Clamp(p_pitch, -p_context.ConfigData.MaxPitchAngle, p_context.ConfigData.MaxPitchAngle);
 

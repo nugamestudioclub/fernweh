@@ -6,7 +6,7 @@ public class OrbitState : ADroneState
 
     public override void StateUpdate()
     {
-        (float yaw, float pitch) = CalculateRotationFromInput();
+        (float yaw, float pitch) = CalculateUnscaledRotationFromInput();
 
         // 
         var collision_dir = Quaternion.Euler(pitch, yaw, 0f) * Vector3.forward;

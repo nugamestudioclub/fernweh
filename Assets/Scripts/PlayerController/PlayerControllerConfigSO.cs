@@ -8,6 +8,7 @@ public class PlayerControllerConfigSO : ScriptableObject
     public float JumpBufferDuration; // 0.1f;
     public float CoyoteDuration; // 0.05f
     public float MaxFallSpeed;
+    public float Gravity;
     public AnimationCurve NormalizedJumpForceCurve;
     public float JumpForce;
     public float FinalKeyTimestamp { get => NormalizedJumpForceCurve.keys[^1].time; }
@@ -27,6 +28,8 @@ public class PlayerControllerConfigSO : ScriptableObject
 
     [Space]
     [Header("Movement")]
+    public float MaxInclineAngle;
+    public float SlopeSlideForceScalar;
     public float MaxGroundVelocityMagnitude;
     public float Acceleration;
     [Tooltip("The force to be applied per unit distance when stickiness to ground surface take effect. A positive value.")] 
@@ -41,6 +44,14 @@ public class PlayerControllerConfigSO : ScriptableObject
     [Header("Zipline")]
     public float MaxDriveVelocityMagnitude;
     public float DriveAcceleration;
+
+    [Space]
+
+    public int MaxPlayerAnchorCount;
+    public float MaxAnchorPlaceDistance;
+    public float PlayerAnchorAttachmentRadius;
+    public LayerMask AnchorPlacementMask;
+    public ZiplineAnchor AnchorPrefab;
 
     [Space]
     [Header("Camera and Drone")]

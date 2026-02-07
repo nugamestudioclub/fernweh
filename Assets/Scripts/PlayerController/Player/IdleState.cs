@@ -30,7 +30,7 @@ public class IdleState : IState<PlayerStateContext, PlayerStateMachine.State>
 
         m_context.SubmachineStateContext.AdditiveYVelocity = 
             Mathf.Max(
-                m_context.SubmachineStateContext.AdditiveYVelocity + Physics.gravity.y * Time.deltaTime, 
+                m_context.SubmachineStateContext.AdditiveYVelocity + m_context.SubmachineStateContext.ConfigData.Gravity * Time.deltaTime, 
                 -m_context.SubmachineStateContext.ConfigData.MaxFallSpeed);
     }
 

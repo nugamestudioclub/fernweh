@@ -9,9 +9,10 @@ public class MovementStateContext : MonoBehaviour, IStateContext
 
     // ---------------- public read-write ----------------
     // TODO: Separate this into public read, and public read-write? Not all of these need to be mutated outside this class.
-    [HideInInspector] public AirState AirState;
+    /*[HideInInspector] DEBUG*/ public AirState AirState;
 
     [HideInInspector] public Vector2 MovementInput;
+    /*[HideInInspector] DEBUG*/ public bool IsOnSlipSlope; // if we're on a too-intense incline and need to slide against it
     [HideInInspector] public bool IsJumpDown;
     [HideInInspector] public bool WasJumpPressedThisFrame;
     [HideInInspector] public TemporaryBoolean HasQueuedJumpAction; // have we input a jump action recently?
@@ -114,8 +115,24 @@ public class MovementStateContext : MonoBehaviour, IStateContext
         // see below for the logical explanation of this
         bool is_already_grounded = AirState == AirState.Grounded;
         bool grounded_this_frame = is_already_grounded ? did_hit || HasStickySurface() : did_hit;
-        
+
+        IsOnSlipSlope = false;
         SurfaceNormal = Vector3.zero;
+
+        // if we did hit terrain and the angle is too steep, we're not grounded
+        if (did_hit && Vector3.Angle(Vector3.up, hit.normal) > ConfigData.MaxInclineAngle)
+        {
+            grounded_this_frame = false;
+            IsOnSlipSlope = true;
+            SurfaceNormal = hit.normal;
+
+            // DEBUG
+            Debug.DrawRay(transform.position, SurfaceNormal * 3f, Color.green);
+            var surf_right = Vector3.Cross(Vector3.up, SurfaceNormal);
+            Debug.DrawRay(transform.position, surf_right * 3f, Color.blue);
+            var surf_forward = Vector3.Cross(SurfaceNormal, surf_right);
+            Debug.DrawRay(transform.position, surf_forward * 3f, Color.red);
+        }
 
         // are we okay to check if grounded and we ARE grounded?
         // grounded in this context has two cases depending on if we were grounded the previous frame (i.e.

@@ -1,3 +1,4 @@
+using UnityEditor.Analytics;
 using UnityEngine;
 
 public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.State>
@@ -52,7 +53,7 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
         // once we've moved for the frame, clear the cumulative movement
         m_cumulativeFrameMovement = Vector3.zero;
 
-        if (move_result != CollisionFlags.None || !current_line.IsPositionOnLine(cc.transform.position))
+        if (move_result != CollisionFlags.None || !current_line.GetData().IsPositionOnLine(cc.transform.position))
         {
             cc.transform.position = backup_pos;
             m_mContextCache.LateralVelocity = Vector3.zero;
@@ -87,9 +88,9 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
         var inputs = m_mContextCache.MovementInput.normalized;
         var current_line = m_myContext.MountedLine;
 
-        var perspective_dir = m_mContextCache.PointOfView.TransformDirection(inputs);
+        var perspective_dir = m_mContextCache.PointOfView.TransformDirection(new Vector3(inputs.x, 0f, inputs.y));
 
-        var target_line_velo = MatchVelocityToLine(perspective_dir, current_line.GetDirection()) * m_mContextCache.ConfigData.MaxDriveVelocityMagnitude;
+        var target_line_velo = MatchVelocityToLine(perspective_dir, current_line.GetData().GetDirection()) * m_mContextCache.ConfigData.MaxDriveVelocityMagnitude;
 
         return Vector3.MoveTowards(
                 m_mContextCache.LateralVelocity,
@@ -103,7 +104,7 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
         m_mContextCache = m_myContext.SubmachineStateContext;
 
         // if our hit point was consumed without reapplication, that means we entered this state
-        // without hitting a ZiplineObject, meaning we don't need to do this snapping behavior.
+        // without hitting a ZiplineObject_OLD, meaning we don't need to do this snapping behavior.
         // E.G. Locked -> Zipline.
         if (m_myContext.HitPoint == Vector3.zero)
         {
@@ -127,8 +128,8 @@ public class OnZiplineState : IState<PlayerStateContext, PlayerStateMachine.Stat
         // reorient the player's velocity to along the line
         m_mContextCache.LateralVelocity =
             MatchVelocityToLine(
-                m_mContextCache.PointOfView.TransformDirection(inputs),
-                current_line.GetDirection()) // get the velo dir...
+                m_mContextCache.PointOfView.TransformDirection(new Vector3(inputs.x, 0f, inputs.y)),
+                current_line.GetData().GetDirection()) // get the velo dir...
             * m_mContextCache.LateralVelocity.magnitude; // ... and rescale
     }
 
